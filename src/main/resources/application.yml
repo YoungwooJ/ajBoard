@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    dbcp2:
+      url: jdbc:h2:mem:;MODE=MSSQLServer
+#      url: jdbc:h2:mem:;MODE=MSSQLServer
+      username: ren
+      password: ajur2ntal~!
+      driver-class-name: org.h2.Driver
+
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+
+server:
+  port: 8080
+
+
