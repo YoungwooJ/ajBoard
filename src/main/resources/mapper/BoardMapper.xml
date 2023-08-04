@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.BoardMapper">
+
+    <!--게시글 삭제-->
+    <delete id="deleteBoard" parameterType="int">
+        DELETE FROM board WHERE board_no = #{boardNo}
+    </delete>
+
+    <!--게시글 수정-->
+    <update id="updateBoard" parameterType="com.example.demo.domain.BoardDTO">
+        UPDATE board
+        SET title = #{title}
+                , content = #{content}
+                , writer = #{writer}
+                , updatedate = CURRENT_DATE
+    </update>
+
+    <!--게시글 입력-->
+    <insert id="insertBoard" parameterType="com.example.demo.domain.BoardDTO">
+        INSERT INTO board (
+            title
+            , content
+            , writer
+            , createdate
+            , updatedate
+        ) VALUES (
+            #{title}
+            , #{content}
+            , #{writer}
+            , CURRENT_DATE
+            , CURRENT_DATE
+        )
+    </insert>
+
+    <!--게시글 상세정보-->
+    <select id="selectBoardOne" parameterType="int" resultType="java.util.Map">
+        SELECT
+            board_no AS boardNo
+             , title
+             , content
+             , writer
+             , createdate
+             , updatedate
+        FROM board
+    </select>
+
+    <!--게시글 조회-->
+    <select id="selectBoardList" resultType="java.util.Map" >
+        SELECT
+            board_no AS boardNo
+            , title
+            , writer
+            , createdate
+            , updatedate
+        FROM board
+    </select>
+
+</mapper>
