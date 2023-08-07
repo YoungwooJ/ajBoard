@@ -15,7 +15,6 @@
         <%--보기, 검색창--%>
         <form></form>
         <%--게시물--%>
-        <c:out value="${list}"/>
         <table border="1">
             <tr>
                 <th>번호</th>
@@ -24,7 +23,7 @@
                 <th>작성일</th>
                 <th>수정일</th>
             </tr>
-            <c:forEach var="board" items="${dtoList}" varStatus="status">
+           <%-- <c:forEach var="board" items="${dtoList}" varStatus="status">
                 <c:out value="${board.boardNo}"/>
                 <tr>
                     <td>${board.boardNo}</td>
@@ -33,20 +32,20 @@
                     <td>${board.createdate}</td>
                     <td>${board.updatedate}</td>
                 </tr>
-            </c:forEach>
-            <c:forEach var="b" items="${list}" varStatus="status">
-                <c:out value="${b.boardNo}"/>
+            </c:forEach>--%>
+            <c:forEach var="b" items="${boardList}" varStatus="status">
                 <tr>
-                    <td>${b.boardNo}<c:out value="1"/></td>
-                    <td><a href="${pageContext.request.contextPath}/board/getBoardOne?boardNo=${b.boardNo}">${b.title}</a></td>
-                    <td>${b.writer}</td>
-                    <td>${b.createdate}</td>
-                    <td>${b.updatedate}</td>
+                    <td>${b.BOARDNO}</td>
+                    <td><a href="${pageContext.request.contextPath}/board/getBoardOne?boardNo=${b.BOARDNO}">${b.TITLE}</a></td>
+                    <td>${b.WRITER}</td>
+                    <td>${b.CREATEDATE}</td>
+                    <td>${b.UPDATEDATE}</td>
                 </tr>
             </c:forEach>
         </table>
         <a href="${pageContext.request.contextPath}/board/addBoard">게시물 입력</a>
         <%--페이징--%>
+
     </div>
 </body>
 </html>

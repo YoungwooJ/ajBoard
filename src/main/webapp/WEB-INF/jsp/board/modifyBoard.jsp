@@ -17,37 +17,37 @@
             <tr>
                 <td>번호</td>
                 <td>
-                    <input type="text" name="title" value="${board.boardNo}" readonly="readonly">
+                    <input type="text" name="boardNo" value="${board.BOARDNO}" readonly="readonly">
                 </td>
             </tr>
             <tr>
                 <td>작성자</td>
                 <td>
-                    <input type="text" name="writer" value="${board.writer}" readonly="readonly">
+                    <input type="text" name="writer" value="${board.WRITER}" readonly="readonly">
                 </td>
             </tr>
             <tr>
                 <td>제목</td>
                 <td>
-                    <input type="text" name="title" value="${board.title}">
+                    <input type="text" name="title" value="${board.TITLE}">
                 </td>
             </tr>
             <tr>
                 <td>내용</td>
                 <td>
-                    <textarea rows="20" cols="50" name="content">${board.content}</textarea>
+                    <textarea rows="20" cols="50" name="content">${board.CONTENT}</textarea>
                 </td>
             </tr>
             <tr>
                 <td>작성일자</td>
                 <td>
-                    <input type="text" name="createdate" value="${board.createdate}" readonly="readonly">
+                    <input type="text" name="createdate" value="${board.CREATEDATE}" readonly="readonly">
                 </td>
             </tr>
             <tr>
                 <td>수정일자</td>
                 <td>
-                    <input type="text" name="updatedate" value="${board.updatedate}" readonly="readonly">
+                    <input type="text" name="updatedate" value="${board.UPDATEDATE}" readonly="readonly">
                 </td>
             </tr>
         </table>

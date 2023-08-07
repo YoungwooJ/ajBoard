@@ -17,15 +17,15 @@
     </update>
 
     <!--회원 정보 수정-->
-    <update id="updateMember" parameterType="com.example.demo.domain.MemberDTO">
+    <update id="updateMember" parameterType="hashmap">
         UPDATE member
-        SET id = #{id}
-            , name = #{name}
-            , birth = #{birth}
-            , gender = #{gender}
-            , phone = #{phone}
-            , email = #{email}
-        WHERE id = #{id}
+        SET <if test="id != null and !id.equals('')">id = #{id}</if>
+            <if test="name != null and !name.equals('')">, name = #{name}</if>
+            <if test="birth != null and !birth.equals('')">, birth = #{birth}</if>
+            <if test="gender != null and !gender.equals('')">, gender = #{gender}</if>
+            <if test="phone != null and !phone.equals('')">, phone = #{phone}</if>
+            <if test="email != null and !email.equals('')">, email = #{email}</if>
+        WHERE id = #{oldId}
     </update>
 
     <!--회원가입-->

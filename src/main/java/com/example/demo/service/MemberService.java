@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+
 @Service
 @Transactional
 public class MemberService {
@@ -34,8 +37,22 @@ public class MemberService {
     }
 
     // 회원 정보 수정
-    public int modifyMember(MemberDTO memberDTO) {
-        return memberMapper.updateMember(memberDTO);
+    public int modifyMember(HttpSession session, MemberDTO memberDTO, String oldId) {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("id", memberDTO.getId());
+        map.put("name", memberDTO.getName() );
+        map.put("birth", memberDTO.getBirth());
+        map.put("gender", memberDTO.getGender());
+        map.put("phone", memberDTO.getPhone());
+        map.put("email", memberDTO.getEmail());
+        map.put("oldId", oldId);
+
+        /*세션 삭제*/
+        session.removeAttribute("loginMember");
+        /*세션 수정*/
+        session.setAttribute("loginMember", memberDTO);
+
+        return memberMapper.updateMember(map);
     }
 
     // 회원 탈퇴

@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.domain.BoardDTO;
+import com.example.demo.domain.MemberDTO;
 import com.example.demo.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +33,12 @@ public class BoardController {
     public String getBoardList(Model model) {
 
         List<Map<String, Object>> boardList = boardService.getBoardList();
-        model.addAttribute("list", boardList);
+        model.addAttribute("boardList", boardList);
 
         /*for(Map<String, Object> m : boardList ) {
             System.out.println("m : " + m);
             BoardDTO board = new BoardDTO();
-            board.setBoardNo((Integer)m.get("boardNo"));
+            board.setBoardNo((int)m.get("boardNo"));
             board.setTitle((String)m.get("title"));
             board.setWriter((String)m.get("writer"));
             board.setCreatedate((String)m.get("createdate"));
@@ -61,7 +62,10 @@ public class BoardController {
 
     // 게시글 입력
     @GetMapping("/board/addBoard")
-    public String addBoard() {
+    public String addBoard(HttpSession session, Model model) {
+        MemberDTO loginMember = (MemberDTO)session.getAttribute("loginMember");
+        model.addAttribute("loginMember", loginMember);
+
         return "/board/addBoard";
     }
     @PostMapping("/board/addBoard")
@@ -71,10 +75,10 @@ public class BoardController {
         // row != 0 이면 입력 성공
         if(row == 0) {
             model.addAttribute("msg", "등록 실패하였습니다.");
-            return "/board/addBoard";
+            return "redirect:/board/addBoard?boardNo="+boardDTO.getBoardNo();
         }
 
-        return "/board/getBoardList";
+        return "redirect:/board/getBoardList";
     }
 
     // 게시글 수정
@@ -94,10 +98,10 @@ public class BoardController {
         // row != 0 이면 수정 성공
         if(row == 0) {
             model.addAttribute("msg", "수정 실패하였습니다.");
-            return "/board/modifyBoard?boardNo="+boardDTO.getBoardNo();
+            return "redirect:/board/modifyBoard?boardNo="+boardDTO.getBoardNo();
         }
 
-        return "/board/modifyBoard";
+        return "redirect:/board/getBoardList";
     }
 
     // 게시글 삭제
@@ -108,7 +112,7 @@ public class BoardController {
         int row = boardService.removeBoard(boardNo);
         if(row == 0) {
             model.addAttribute("msg", "삭제 실패하였습니다.");
-            return "/board/getBoardOne";
+            return "redirect:/board/getBoardOne?boardNo="+boardNo;
         }
 
         return "redirect:/board/getBoardList";

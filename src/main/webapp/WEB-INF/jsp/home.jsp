@@ -12,11 +12,13 @@
         <c:out value="${loginMember}"/><br>
         <c:choose>
             <c:when test="${loginMember ne null}">
-                <a href="${pageContext.request.contextPath}/member/memberOne">회원 정보</a>
-                <a href="${pageContext.request.contextPath}/member/logout">로그아웃</a>
+                <a type="button" href="${pageContext.request.contextPath}/member/memberOne">회원 정보</a>
+                <a type="button" href="${pageContext.request.contextPath}/member/logout">로그아웃</a>
+                <br>
+                <a type="button" href="${pageContext.request.contextPath}/board/getBoardList">게시판 바로가기</a>
             </c:when>
             <c:otherwise>
-                <a href="${pageContext.request.contextPath}/member/loginMember">로그인</a>
+                <a type="button" href="${pageContext.request.contextPath}/member/loginMember">로그인</a>
             </c:otherwise>
         </c:choose>
     </body>

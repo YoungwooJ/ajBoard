@@ -3,6 +3,8 @@ package com.example.demo.repository;
 import com.example.demo.domain.MemberDTO;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
+
 @Repository
 public interface MemberMapper {
 
@@ -21,7 +23,7 @@ public interface MemberMapper {
     int updateMemberPassword(MemberDTO memberDTO);
 
     // 회원 정보 수정
-    int updateMember(MemberDTO memberDTO);
+    int updateMember(HashMap<String, Object> hashMap);
     
     // 회원 탈퇴
     int deleteMember(MemberDTO memberDTO);

@@ -15,31 +15,31 @@
         <table border="1">
             <tr>
                 <td>번호</td>
-                <td>${board.boardNo}</td>
+                <td>${board.BOARDNO}</td>
             </tr>
             <tr>
                 <td>제목</td>
-                <td>${board.boardTitle}</td>
+                <td>${board.TITLE}</td>
             </tr>
             <tr>
                 <td>제목</td>
-                <td>${board.boardContent}</td>
+                <td>${board.CONTENT}</td>
             </tr>
             <tr>
                 <td>작성자</td>
-                <td>${board.writer}</td>
+                <td>${board.WRITER}</td>
             </tr>
             <tr>
                 <td>작성일</td>
-                <td>${board.createdate}</td>
+                <td>${board.CREATEDATE}</td>
             </tr>
             <tr>
                 <td>수정일</td>
-                <td>${board.updatedate}</td>
+                <td>${board.UPDATEDATE}</td>
             </tr>
         </table>
-        <a href="${pageContext.request.contextPath}/board/modifyBoard">게시물 수정</a>
-        <a type="button" href="${pageContext.request.contextPath}/board/removeBoard">게시물 삭제</a>
+        <a href="${pageContext.request.contextPath}/board/modifyBoard?boardNo=${board.BOARDNO}">게시물 수정</a>
+        <a type="button" href="${pageContext.request.contextPath}/board/removeBoard?boardNo=${board.BOARDNO}">게시물 삭제</a>
         <%--페이징--%>
     </div>
 </body>

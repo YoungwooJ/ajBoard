@@ -9,7 +9,8 @@
 </head>
 <body>
 <h2>회원정보</h2>
-    <c:out value="${member}"/>
+    <%--디버깅--%>
+    <%--<c:out value="${member}"/>--%>
     <table border="1">
         <tr>
             <td>아이디</td>
