@@ -9,7 +9,7 @@
     </head>
     <body>
         <h1>Home입니다.</h1>
-        <c:out value="${loginMember}"/><br>
+        <br>
         <c:choose>
             <c:when test="${loginMember ne null}">
                 <a type="button" href="${pageContext.request.contextPath}/member/memberOne">회원 정보</a>

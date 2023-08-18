@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.CommentMapper">
+
+    <!--댓글 개수-->
+    <select id="selectCommentCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM comment
+        WHERE board_no = #{boardNo} AND c_depth = 0;
+    </select>
+
+    <!--댓글 삭제-->
+    <update id="deleteComment" parameterType="int">
+        UPDATE comment
+        SET flag = 'Y'
+        WHERE comment_no = #{commentNo};
+    </update>
+
+    <!--댓글 수정-->
+    <update id="updateComment" parameterType="com.example.demo.domain.CommentDTO">
+        UPDATE comment
+        SET comment = #{comment}
+        WHERE comment_no = #{commentNo};
+    </update>
+
+    <!--댓글 입력-->
+    <insert id="insertReply" parameterType="com.example.demo.domain.CommentDTO">
+        INSERT INTO comment (
+              board_no
+            , writer
+            , comment
+            , c_depth
+            , c_group
+            , createdate
+            , flag
+        ) VALUES (
+             #{boardNo}
+            , #{writer}
+            , #{comment}
+            , 1
+            , #{cgroup}
+            , CURRENT_TIMESTAMP
+            , 'N'
+        );
+    </insert>
+
+    <!--댓글 입력-->
+    <insert id="insertComment" parameterType="com.example.demo.domain.CommentDTO">
+        INSERT INTO comment (
+            board_no
+            , writer
+            , comment
+            , c_depth
+            , c_group
+            , createdate
+            , flag
+        ) VALUES (
+            #{boardNo}
+            , #{writer}
+            , #{comment}
+            , 0
+            , 0
+            , CURRENT_TIMESTAMP
+            , 'N'
+        );
+    </insert>
+    
+    <!--대댓글 출력-->
+    <select id="selectReplyList" parameterType="int" resultType="com.example.demo.domain.CommentDTO">
+        SELECT
+            comment_no commentNo
+             , board_no boardNo
+             , writer
+             , comment
+             , c_depth cdepth
+             , c_group cgroup
+             , createdate
+             , flag
+        FROM comment
+        WHERE board_no = #{boardNo} AND flag = 'N' AND c_depth = 1
+        ORDER BY createdate ASC;
+    </select>
+    
+    <!--댓글 한 개 출력-->
+    <select id="selectCommentOne" parameterType="int" resultType="com.example.demo.domain.CommentDTO">
+        SELECT
+            comment_no commentNo
+             , board_no boardNo
+             , writer
+             , comment
+             , createdate
+             , flag
+        FROM comment
+        WHERE comment_no = #{commentNo} AND flag = 'N';
+    </select>
+
+    <!--댓글 목록 출력-->
+    <select id="selectCommentList" parameterType="int" resultType="com.example.demo.domain.CommentDTO">
+        SELECT
+            comment_no commentNo
+            , board_no boardNo
+            , writer
+            , comment
+            , c_depth cdepth
+            , c_group cgroup
+            , createdate
+            , flag
+        FROM comment
+        WHERE board_no = #{boardNo} AND flag = 'N' AND c_depth = 0
+        ORDER BY createdate ASC;
+    </select>
+
+</mapper>
