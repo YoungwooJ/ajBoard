@@ -12,7 +12,7 @@
     <h3>게시물 입력</h3>
     <br>
     <%--게시물--%>
-    <form method="post" action="${pageContext.request.contextPath}/board/addBoard">
+    <form enctype="multipart/form-data" method="post" action="${pageContext.request.contextPath}/board/addBoard">
         <table border="1">
             <tr>
                 <td>제목</td>
@@ -30,6 +30,12 @@
                 <td>내용</td>
                 <td>
                     <textarea rows="20" cols="50" name="content"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>파일 업로드</td>
+                <td>
+                    <input type="file" name="files" multiple>
                 </td>
             </tr>
         </table>

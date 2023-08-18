@@ -2,61 +2,114 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.repository.BoardMapper">
+    <!--조회수 증가-->
+    <update id="increaseViews" parameterType="int">
+        UPDATE board
+        SET views = views + 1
+        WHERE board_no = #{boardNo};
+    </update>
+
+    <!--게시글 개수 카운트-->
+    <select id="selectBoardCount" resultType="int">
+        SELECT COUNT(*)
+        FROM board
+        WHERE flag = 'N'
+        <if test="category != null"> AND </if>
+        <if test="'title'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%')</if>
+        <if test="'content'.equals(category) and search != null">content ILIKE CONCAT('%',#{search},'%')</if>
+        <if test="'writer'.equals(category) and search != null">writer ILIKE CONCAT('%',#{search},'%')</if>
+    </select>
 
     <!--게시글 삭제-->
     <delete id="deleteBoard" parameterType="int">
-        DELETE FROM board WHERE board_no = #{boardNo}
+        UPDATE board
+        SET flag = 'Y'
+        WHERE board_no = #{boardNo};
     </delete>
 
     <!--게시글 수정-->
     <update id="updateBoard" parameterType="com.example.demo.domain.BoardDTO">
         UPDATE board
         SET title = #{title}
-                , content = #{content}
-                , writer = #{writer}
-                , updatedate = CURRENT_TIMESTAMP
-        WHERE board_no = #{boardNo}
+            , content = #{content}
+            , updatedate = CURRENT_TIMESTAMP
+        WHERE board_no = #{boardNo};
     </update>
 
     <!--게시글 입력-->
     <insert id="insertBoard" parameterType="com.example.demo.domain.BoardDTO">
+        <selectKey resultType="int" keyProperty="boardNo" keyColumn="board_no" order="AFTER">
+            <!-- LAST_INSERT_ID()  마지막 auto_increment값 반환하는 함수 -->
+            SELECT LAST_INSERT_ID();
+        </selectKey>
         INSERT INTO board (
             title
             , content
             , writer
+            , views
             , createdate
             , updatedate
+            , flag
         ) VALUES (
             #{title}
             , #{content}
             , #{writer}
+            , 0
             , CURRENT_TIMESTAMP
             , CURRENT_TIMESTAMP
-        )
+            , 'N'
+        );
     </insert>
 
     <!--게시글 상세정보-->
     <select id="selectBoardOne" parameterType="int" resultType="java.util.Map">
         SELECT
             board_no AS boardNo
+            , title
+            , content
+            , writer
+            , views
+            , createdate
+            , updatedate
+        FROM board
+        WHERE board_no = #{boardNo};
+    </select>
+
+    <!--게시글과 첨부파일 상세정보-->
+    <select id="selectBoardOneWithFiles" parameterType="int" resultType="java.util.Map">
+        SELECT
+            b.board_no AS boardNo
              , title
              , content
              , writer
-             , createdate
+             , b.createdate
              , updatedate
-        FROM board
-        WHERE board_no = #{boardNo}
+             , f.board_file_no boardFileNo
+             , f.origin_name originName
+             , f.file_name fileName
+        FROM board b
+                 JOIN board_file f ON b.board_no = f.board_no
+        WHERE b.board_no = #{boardNo};
     </select>
 
-    <!--게시글 조회-->
-    <select id="selectBoardList" resultType="java.util.Map" >
+    <!--게시글 조회 및 검색-->
+    <select id="selectBoardList" parameterType="java.util.Map" resultType="java.util.Map" >
         SELECT
             board_no AS boardNo
             , title
             , writer
+            , views
             , createdate
             , updatedate
+            , flag
         FROM board
+        WHERE flag = 'N'
+        <if test="category != null"> AND </if>
+        <if test="'title'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%')</if>
+        <if test="'content'.equals(category) and search != null">content ILIKE CONCAT('%',#{search},'%')</if>
+        <if test="'writer'.equals(category) and search != null">writer ILIKE CONCAT('%',#{search},'%')</if>
+        ORDER BY board_no ASC
+        LIMIT #{beginRow}, #{rowPerPage};
     </select>
 
 </mapper>
