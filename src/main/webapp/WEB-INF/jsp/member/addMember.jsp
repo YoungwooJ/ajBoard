@@ -12,6 +12,8 @@
     <script>
         $(document).ready(function (){
             let allCk = false;
+            let idCk = false;
+
             $('#id').focus();
 
             // 아이디 유효성 검사
@@ -21,7 +23,11 @@
                     $('#id').focus();
                 } else {
                     $('#msg').text('');
-                    $('#password').focus();
+                    $('#id').val($(this).val());
+                    $('#idCheckBtn').focus();
+                    if(idCk == true) {
+                        $('#password').focus();
+                    }
                 }
             });
 
@@ -105,11 +111,34 @@
 
             // 회원 가입 버튼
             $('#addBtn').click(function(){
-                if(allCk == false){
+                if(allCk == false || idCk == false){
+                    $('#msg').text('빈 칸 없이 작성하시고 아이디 중복 체크를 해주세요.');
                     $('#id').focus();
                     return false;
                 }
                 $('#addForm').submit();
+            });
+
+            // ID 중복체크
+            $(document).on('click', '#idCheckBtn', function(){
+                $.ajax({
+                    url : '${pageContext.request.contextPath}/member/getIdCheck'
+                    , type : 'GET'
+                    , data : {"id" : $('#id').val()}
+                    , success : function(data){
+                        if(data == null || data == ""){
+                            alert("사용가능한 ID입니다.");
+                            $('#id').focus();
+                            idCk = true;
+                        } else if(data != null || data != "") {
+                            alert("중복된 ID입니다.");
+                            $('#id').focus();
+                        }
+                    }
+                    , error : function (error){
+                        alert("ID 중복체크 실패");
+                    }
+                })
             });
         });
     </script>
@@ -125,7 +154,7 @@
             <td>아이디</td>
             <td>
                 <input type="text" id="id" name="id" value="">
-                <button type="button">중복확인</button>
+                <button id="idCheckBtn" type="button">중복확인</button>
             </td>
         </tr>
         <tr>
