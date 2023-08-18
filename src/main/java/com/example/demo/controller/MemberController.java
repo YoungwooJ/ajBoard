@@ -16,6 +16,44 @@ import javax.servlet.http.HttpSession;
 public class MemberController {
     @Autowired MemberService memberService;
 
+    // 비밀번호 찾기
+    @GetMapping("/member/findMemberPw")
+    public String findMemberPw() {
+        return "/member/findMemberPw";
+    }
+
+    // 아이디 찾기
+    @GetMapping("/member/findMemberId")
+    public String findMemberId() {
+        return "/member/findMemberId";
+    }
+    @PostMapping("/member/findMemberId")
+    public String findMemberId(Model model, MemberDTO memberDTO) {
+        if(memberDTO.getGender().equals("M")){
+            memberDTO.setGender("남자");
+        } else {
+            memberDTO.setGender("여자");
+        }
+        MemberDTO member = memberService.findMemberId(memberDTO);
+        if(member == null ){
+            model.addAttribute("msg", "등록된 회원정보가 없습니다.");
+            return "/member/findMemberId";
+        }
+        return "redirect:/member/findMemberIdResult?memberId="+member.getId();
+    }
+    @GetMapping("/member/findMemberIdResult")
+    public String findMemberIdResult(Model model
+                                    , @RequestParam(value="memberId", required = true) String memberId) {
+        model.addAttribute("memberId", memberId);
+        return "/member/findMemberIdResult";
+    }
+
+    // 아이디 및 비밀번호 찾기 홈
+    @GetMapping("/member/findMemberIdPw")
+    public String findMemberIdPw() {
+        return "/member/findMemberIdPw";
+    }
+
     // 홈
     @RequestMapping("/home")
     public String home() {
@@ -31,20 +69,20 @@ public class MemberController {
     public String addMember(Model model, MemberDTO memberDTO
                                 , @RequestParam(value="address", required = true) String address){
         // 중복 아이디 체크
-        String idCheck = memberService.getIdCheck(memberDTO.getId());
+        MemberDTO idCheck = memberService.getIdCheck(memberDTO.getId());
         if(idCheck != null) {
             model.addAttribute("errodMsg", "중복된ID입니다.");
             return "redirect:/member/addMember";
         }
         // 성별 한글로 바꿔주기
         String gender = memberDTO.getGender();
-        if(gender.equals("M")) {
+        if("M".equals(gender)) {
             memberDTO.setGender("남자");
         } else {
             memberDTO.setGender("여자");
         }
         // 이메일 주소가 직접 입력이 아니라면
-        if(! address.equals("noAddress")) {
+        if(! "noAddress".equals(address)) {
             String email = memberDTO.getEmail() + "@" + address;
             memberDTO.setEmail(email);
         }
@@ -52,7 +90,7 @@ public class MemberController {
         // row == 1 이면 입력 성공
         if(row == 0) {
             model.addAttribute("errorMsg", "시스템 에러로 등록 실패하였습니다.");
-            return "redirect/member/addMember";
+            return "redirect:/member/addMember";
         }
         return "redirect:/member/loginMember";
     }
@@ -79,8 +117,6 @@ public class MemberController {
     // 회원 정보
     @GetMapping("/member/memberOne")
     public String memberOne(HttpSession session, Model model){
-        /*디버깅 코드*/
-        // System.out.println("sessionAtt : "+session.getAttribute("loginMember"));
         MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
         model.addAttribute("member", loginMember);
 
@@ -149,17 +185,17 @@ public class MemberController {
             // 비밀번호가 맞다면 서비스 실행
 
             // 아이디 체크
-            if(memberDTO.getId() == null || memberDTO.getId().equals("")) {
+            if(memberDTO.getId() == null || "".equals(memberDTO.getId())) {
                 memberDTO.setId(oldId);
             }
 
             // 이름 체크
-            if(memberDTO.getName() == null || memberDTO.getName().equals("")) {
+            if(memberDTO.getName() == null || "".equals(memberDTO.getName())) {
                 memberDTO.setName(oldName);
             }
 
             // 생년월일 체크
-            if(memberDTO.getBirth() == null || memberDTO.getBirth().equals("")) {
+            if(memberDTO.getBirth() == null || "".equals(memberDTO.getBirth())) {
                 memberDTO.setBirth(oldBirth);
             }
 
@@ -168,28 +204,26 @@ public class MemberController {
             gender = memberDTO.getGender();
 
             /*성별 한글로 바꿔주기*/
-            if(gender == null || gender.equals("")) {
+            if(gender == null || "".equals(gender)) {
                 memberDTO.setGender(oldGender);
-            } else if(gender.equals("F")) {
+            } else if("F".equals(gender)) {
                 memberDTO.setGender("여자");
-            } else if(gender.equals("M")){
+            } else if("M".equals(gender)){
                 memberDTO.setGender("남자");
             }
 
             // 핸드폰 번호 체크
-            if(memberDTO.getPhone() == null || memberDTO.getPhone().equals("")) {
+            if(memberDTO.getPhone() == null || "".equals(memberDTO.getPhone())) {
                 memberDTO.setPhone(oldPhone);
             }
 
             // 이메일 주소가 직접 입력이 아니라면
-            if (memberDTO.getEmail() == null || memberDTO.getEmail().equals("")) {
+            if (memberDTO.getEmail() == null || "".equals(memberDTO.getEmail())) {
                 memberDTO.setEmail(oldEmail);
-            } else if(! address.equals("noAddress") || memberDTO.getEmail() != null || !memberDTO.getEmail().equals("")) {
+            } else if(! "noAddress".equals(address) || memberDTO.getEmail() != null || !"".equals(memberDTO.getEmail())) {
                 String email = memberDTO.getEmail() + "@" + address;
                 memberDTO.setEmail(email);
             }
-            // 디버깅 코드
-            System.out.println(memberDTO);
             
             int row = memberService.modifyMember(session, memberDTO, oldId);
             // row == 1 이면 입력 성공

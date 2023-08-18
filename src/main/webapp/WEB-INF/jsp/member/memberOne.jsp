@@ -8,44 +8,42 @@
     <title></title>
 </head>
 <body>
-<h2>회원정보</h2>
-    <%--디버깅--%>
-    <%--<c:out value="${member}"/>--%>
+    <h2>회원정보</h2>
     <table border="1">
         <tr>
             <td>아이디</td>
             <td>
-                <input type="text" name="id" value="${member.id}">
+                ${member.id}
             </td>
         </tr>
         <tr>
             <td>이름</td>
             <td>
-                <input type="text" name="name" value="${member.name}">
+                ${member.name}
             </td>
         </tr>
         <tr>
             <td>생년월일</td>
             <td>
-                <input type="date" name="birth" value="${member.birth}">
+                ${member.birth}
             </td>
         </tr>
         <tr>
             <td>성별</td>
             <td>
-                <input type="text" name="gender" value="${member.gender}">
+                ${member.gender}
             </td>
         </tr>
         <tr>
             <td>핸드폰</td>
             <td>
-                <input type="text" name="phone" value="${member.phone}">
+                ${member.phone}
             </td>
         </tr>
         <tr>
             <td>이메일 주소</td>
             <td>
-                <input type="text" name="email" value="${member.email}">
+                ${member.email}
             </td>
         </tr>
     </table>

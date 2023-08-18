@@ -3,17 +3,46 @@
 
 <mapper namespace="com.example.demo.repository.MemberMapper">
 
+    <!--아이디 찾기-->
+    <select id="findMemberId" parameterType="com.example.demo.domain.MemberDTO" resultType="com.example.demo.domain.MemberDTO">
+        SELECT
+            id
+            , name
+            , birth
+            , gender
+            , phone
+            , email
+            , flag
+        FROM member
+        WHERE name = #{name} AND birth = #{birth} AND gender = #{gender} AND phone = #{phone} AND flag = 'N';
+    </select>
+
+    <!--Email과 id의 일치여부를 check-->
+    <select id="selectEmailCheck" parameterType="com.example.demo.domain.MemberDTO" resultType="com.example.demo.domain.MemberDTO">
+        SELECT
+            id
+            , name
+            , birth
+            , gender
+            , phone
+            , email
+            , flag
+        FROM member
+        WHERE email = #{email} AND id = #{id} AND flag = 'N';
+    </select>
+
     <!--회원탈퇴-->
     <delete id="deleteMember" parameterType="com.example.demo.domain.MemberDTO">
-        DELETE FROM member
-        WHERE id = #{id}
+        UPDATE member
+        SET flag = 'Y'
+        WHERE id = #{id};
     </delete>
 
     <!--회원 비밀번호 수정-->
     <update id="updateMemberPassword" parameterType="com.example.demo.domain.MemberDTO">
         UPDATE member
         SET password = #{password}
-        WHERE id = #{id}
+        WHERE id = #{id};
     </update>
 
     <!--회원 정보 수정-->
@@ -25,7 +54,7 @@
             <if test="gender != null and !gender.equals('')">, gender = #{gender}</if>
             <if test="phone != null and !phone.equals('')">, phone = #{phone}</if>
             <if test="email != null and !email.equals('')">, email = #{email}</if>
-        WHERE id = #{oldId}
+        WHERE id = #{oldId};
     </update>
 
     <!--회원가입-->
@@ -38,6 +67,7 @@
             , gender
             , phone
             , email
+            , flag
         ) VALUES (
             #{id}
             , #{password}
@@ -46,15 +76,17 @@
             , #{gender}
             , #{phone}
             , #{email}
-        )
+            , 'N'
+        );
     </insert>
 
     <!--아이디 중복체크-->
-    <select id="selectIdCheck" parameterType="java.lang.String" resultType="java.lang.String">
+    <select id="selectIdCheck" parameterType="java.lang.String" resultType="com.example.demo.domain.MemberDTO">
         SELECT
             id
+            , flag
         FROM member
-        WHERE id = #{id};
+        WHERE id = #{id} AND flag ='N';
     </select>
 
     <!--로그인-->
@@ -67,7 +99,8 @@
             , gender
             , phone
             , email
+            , flag
         FROM member
-        WHERE id = #{id} AND password = #{password}
+        WHERE id = #{id} AND password = #{password} AND flag = 'N';
     </select>
 </mapper>

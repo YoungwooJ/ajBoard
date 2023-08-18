@@ -26,7 +26,7 @@
         </table>
         <button type="submit">로그인</button>
         <a type="button" href="${pageContext.request.contextPath}/member/addMember">회원가입</a>
-        <a type="button" href="${pageContext.request.contextPath}/member/">ID/PW 찾기</a>
+        <a type="button" href="${pageContext.request.contextPath}/member/findMemberIdPw">ID/PW 찾기</a>
     </form>
 </body>
 </html>

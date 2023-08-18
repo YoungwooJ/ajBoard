@@ -14,7 +14,8 @@
             <tr>
                 <td>아이디</td>
                 <td>
-                    <input type="text" name="oldId" value="${member.id}" readonly="readonly">
+                    ${member.id}
+                    <input type="hidden" name="oldId" value="${member.id}">
                 </td>
                 <td>
                     새로운 아이디
@@ -26,7 +27,8 @@
             <tr>
                 <td>이름</td>
                 <td>
-                    <input type="text" name="oldName" value="${member.name}" readonly="readonly">
+                    ${member.name}
+                    <input type="hidden" name="oldName" value="${member.name}">
                 </td>
                 <td>
                     새로운 이름
@@ -38,7 +40,8 @@
             <tr>
                 <td>생년월일</td>
                 <td>
-                    <input type="text" name="oldBirth" value="${member.birth}" readonly="readonly">
+                    ${member.birth}
+                    <input type="hidden" name="oldBirth" value="${member.birth}">
                 </td>
                 <td>
                     새로운 생년월일
@@ -50,7 +53,8 @@
             <tr>
                 <td>성별</td>
                 <td>
-                    <input type="text" name="oldGender" value="${member.gender}" readonly="readonly">
+                    ${member.gender}
+                    <input type="hidden" name="oldGender" value="${member.gender}">
                 </td>
                 <td>
                     변경할 성별
@@ -63,7 +67,8 @@
             <tr>
                 <td>핸드폰</td>
                 <td>
-                    <input type="text" name="oldPhone" value="${member.phone}" readonly="readonly">
+                    ${member.phone}
+                    <input type="hidden" name="oldPhone" value="${member.phone}">
                 </td>
                 <td>
                     변경할 핸드폰
@@ -75,7 +80,8 @@
             <tr>
                 <td>이메일 주소</td>
                 <td>
-                    <input type="text" name="oldEmail" value="${member.email}" readonly="readonly">
+                    ${member.email}
+                    <input type="hidden" name="oldEmail" value="${member.email}">
                 </td>
                 <td>
                     변경할 이메일 주소
