@@ -13,7 +13,7 @@ public class BoardFormDTO {
     private String writer;
     private String createdate;
     private String updatedate;
-    private String flag;
+    private String remvFlag;
     
     // 멀티 파일 업로드
     private List<MultipartFile> files;

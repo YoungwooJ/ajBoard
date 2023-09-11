@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,84 +53,135 @@ public class BoardService {
         return boardMapper.selectBoardList(map);
     }
 
-    // 댓글, 대댓글
+    // 게시글 입력, 파일 업로드
+    public String addBoard(BoardFormDTO boardFormDTO, String path) {
+        String address = null;
+        try {
+            // 내용이 없을 시
+            if(boardFormDTO.getContent().equals("") || boardFormDTO.getContent() == null) {
+                String msg = URLEncoder.encode("내용을 입력해주세요.", "UTF-8");
+                return "redirect:/board/addBoard?boardNo="+boardFormDTO.getBoardNo()+"&msg="+msg;
+            }
 
+            // 1+2+3+4 -> 트랜잭션 처리
 
-    // 파일 업로드, 다운로드
+            // board 테이블(1) : (N) board_file 테이블
 
-    // 게시글 입력
-    public int addBoard(BoardFormDTO boardFormDTO, String path) {
-        // 1+2+3+4 -> 트랜잭션 처리
+            // 1. board mapper 호출(insert -> key 반환)
+            int boardNo = 0; // insert 후 key 반환값
 
-        // board 테이블(1) : (N) board_file 테이블
+            BoardDTO boardDTO = new BoardDTO();
+            boardDTO.setWriter(boardFormDTO.getWriter());
+            boardDTO.setTitle(boardFormDTO.getTitle());
+            boardDTO.setContent(boardFormDTO.getContent());
 
-        // 1. board mapper 호출(insert -> key 반환)
-        int boardNo = 0; // insert 후 key 반환값
+            int row = boardMapper.insertBoard(boardDTO);
 
-        BoardDTO boardDTO = new BoardDTO();
-        boardDTO.setWriter(boardFormDTO.getWriter());
-        boardDTO.setTitle(boardFormDTO.getTitle());
-        boardDTO.setContent(boardFormDTO.getContent());
+            // boardFormDTO에 path 값과 boardNo 값 세팅
+            boardFormDTO.setPath(path);
+            boardNo = boardDTO.getBoardNo();
 
-        int row = boardMapper.insertBoard(boardDTO);
+            // 파일이 하나 이상일 때
+            if(boardFormDTO.getFiles().get(0).getSize() > 0 && row == 1) {
+                // 2. 파일 업로드
+                List<MultipartFile> files = boardFormDTO.getFiles();
 
-        // boardFormDTO에 path 값과 boardNo 값 세팅
-        boardFormDTO.setPath(path);
-        boardNo = boardDTO.getBoardNo();
+                if (files != null) {
+                    for (MultipartFile mf : files) {
+                        // 3. 파일 저장
+                        BoardFileDTO boardFileDTO = new BoardFileDTO();
 
-        // 파일이 하나 이상일 때
-        if(boardFormDTO.getFiles().get(0).getSize() > 0 && row == 1) {
-            // 2. 파일 업로드
-            List<MultipartFile> files = boardFormDTO.getFiles();
+                        String originName = mf.getOriginalFilename();
 
-            if(files != null) {
-                for(MultipartFile mf : files) {
-                    // 3. 파일 저장
-                    BoardFileDTO boardFileDTO = new BoardFileDTO();
+                        String fileName = UUID.randomUUID().toString().replace("-", ""); // 확장자 미포함
 
-                    String originName = mf.getOriginalFilename();
+                        String ext = originName.substring(originName.lastIndexOf(".") + 1);
 
-                    String fileName = UUID.randomUUID().toString().replace("-",""); // 확장자 미포함
+                        fileName = fileName + "." + ext;
 
-                    String ext = originName.substring(originName.lastIndexOf(".")+1);
+                        File f = new File(boardFormDTO.getPath() + fileName); // 풀네임으로 빈파일을 생성
+                        // 빈파일에 mf안의 업로드된 파일을 복사
 
-                    fileName = fileName + "." + ext;
+                        boardFileDTO.setBoardNo(boardNo);
+                        boardFileDTO.setOriginName(originName);
+                        boardFileDTO.setFileName(fileName);
+                        boardFileDTO.setFileType(mf.getContentType());
+                        boardFileDTO.setFileSize(mf.getSize());
 
-                    File f = new File(boardFormDTO.getPath() + fileName); // 풀네임으로 빈파일을 생성
-                    // 빈파일에 mf안의 업로드된 파일을 복사
+                        // 4. 파일정보를 board_file 테이블에 저장
+                        row = boardFileMapper.insertBoardFile(boardFileDTO);
+                        // row != 0 이면 입력 성공
+                        if (row == 0) {
+                            String msg = URLEncoder.encode("등록 실패하였습니다.", "UTF-8");
+                            address = "redirect:/board/addBoard?boardNo=" + boardFormDTO.getBoardNo() + "&msg=" + msg;
+                        }
+                        String msg = URLEncoder.encode("게시물을 등록하였습니다.", "UTF-8");
+                        address = "redirect:/board/getBoardList?msg=" + msg;
 
-                    boardFileDTO.setBoardNo(boardNo);
-                    boardFileDTO.setOriginName(originName);
-                    boardFileDTO.setFileName(fileName);
-                    boardFileDTO.setFileType(mf.getContentType());
-                    boardFileDTO.setFileSize(mf.getSize());
-
-                    // 4. 파일정보를 board_file 테이블에 저장
-                    row = boardFileMapper.insertBoardFile(boardFileDTO);
-
-                    try {
-                        mf.transferTo(f);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        // 파일업로드에 실패하면
-                        // try...catch절이 필요로 하지 않는 RuntimeException을 발생시켜서
-                        // 애노테이션Transactional이 감지하여 rollback할 수 있도록
-                        throw new RuntimeException();
+                        try {
+                            mf.transferTo(f);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            // 파일업로드에 실패하면
+                            // try...catch절이 필요로 하지 않는 RuntimeException을 발생시켜서
+                            // 애노테이션Transactional이 감지하여 rollback할 수 있도록
+                            throw new RuntimeException();
+                        }
                     }
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return row;
+        return address;
     }
 
     // 게시글 수정
-    public int modifyBoard(BoardDTO boardDTO) {
-        return boardMapper.updateBoard(boardDTO);
+    public String modifyBoard(BoardDTO boardDTO) {
+        String address = null;
+        try {
+            // 방어코드
+            if(boardDTO.getContent().equals("") || boardDTO.getContent() == null) {
+                String msg = URLEncoder.encode("내용을 입력해주세요.", "UTF-8");
+                address = "redirect:/board/modifyBoard?boardNo="+boardDTO.getBoardNo()+"&msg="+msg;
+            }
+            int row = boardMapper.updateBoard(boardDTO);
+            // row != 0 이면 수정 성공
+            if(row == 0) {
+                String msg = URLEncoder.encode("수정 실패하였습니다.", "UTF-8");
+                address = "redirect:/board/modifyBoard?boardNo="+boardDTO.getBoardNo()+"&msg="+msg;
+            } else {
+                String msg = URLEncoder.encode("게시물을 수정하였습니다.", "UTF-8");
+                address = "redirect:/board/getBoardOne?boardNo="+boardDTO.getBoardNo()+"&msg="+msg;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
     }
 
     // 게시글 삭제
-    public int removeBoard(int boardNo) {
-        return boardMapper.deleteBoard(boardNo);
+    public String removeBoard(int boardNo) {
+        String address = null;
+        try {
+            int row = boardMapper.deleteBoard(boardNo);
+            if(row == 0) {
+                String msg = URLEncoder.encode("삭제 실패하였습니다.", "UTF-8");
+                address = "redirect:/board/getBoardOne?boardNo="+boardNo+"&msg="+msg;
+            } else {
+                int fileRow =boardFileMapper.deleteBoardFile(boardNo);
+                if(fileRow == 0){
+                    String msg = URLEncoder.encode("삭제 실패하였습니다.", "UTF-8");
+                    address = "redirect:/board/getBoardOne?boardNo="+boardNo+"&msg="+msg;
+                } else {
+                    String msg = URLEncoder.encode("삭제 성공하였습니다.", "UTF-8");
+                    address = "redirect:/board/getBoardList?msg="+msg;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
     }
 }

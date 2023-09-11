@@ -11,5 +11,5 @@ public class CommentDTO {
     private int cdepth;
     private int cgroup;
     private String createdate;
-    private String flag;
+    private String remvFlag;
 }

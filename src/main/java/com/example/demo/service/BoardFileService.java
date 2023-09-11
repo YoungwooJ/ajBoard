@@ -5,9 +5,18 @@ import com.example.demo.repository.BoardFileMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +25,34 @@ import java.util.UUID;
 public class BoardFileService {
 
     @Autowired BoardFileMapper boardFileMapper;
+
+    // 게시글 파일 다운로드
+    public void fileDownload(@PathVariable String fileName, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // 웹 어플리케이션 루트에 있는 boardFile-upload 디렉토리를 기준으로 파일 경로 생성
+        String relativePath = "/boardFile-upload/";
+        String fullPath = request.getServletContext().getRealPath(relativePath);
+
+        // 파일 객체 생성
+        File file = new File(fullPath, fileName);
+
+        if (file.exists()) {
+            response.setContentType("application/octet-stream");
+            response.setContentLength((int) file.length());
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()) + "\"");
+            response.setHeader("Content-Transfer-Encoding", "binary");
+            // response 객체를 통해서 서버로부터 파일 다운로드
+
+            try (OutputStream os = response.getOutputStream();
+                 // 파일 입력 객체 생성
+                 FileInputStream fis = new FileInputStream(file)) {
+                FileCopyUtils.copy(fis, os);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
 
     // 게시글 파일 삭제
     public int removeBoardFile(int boardFileNo) {

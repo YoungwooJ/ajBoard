@@ -6,7 +6,7 @@
     <!--게시글 파일 삭제-->
     <update id="deleteBoardFile" parameterType="int">
         UPDATE board_file
-        SET flag = 'Y'
+        SET remv_flag = 'Y'
         WHERE board_file_no = #{boardFileNo};
     </update>
 
@@ -29,7 +29,7 @@
             , file_type
             , file_size
             , createdate
-            , flag
+            , remv_flag
         ) VALUES (
             #{boardNo}
             , #{originName}
@@ -52,7 +52,7 @@
              , file_size fileSize
              , createdate
         FROM board_file
-        WHERE board_file_no = #{boardFileNo} AND flag = 'N';
+        WHERE board_file_no = #{boardFileNo} AND remv_flag = 'N';
     </select>
 
     <!--게시글에 맞는 게시글 이미지 목록 출력-->
@@ -66,7 +66,7 @@
             , file_size fileSize
             , createdate
         FROM board_file
-        WHERE board_no = #{boardNo} AND flag = 'N';
+        WHERE board_no = #{boardNo} AND remv_flag = 'N';
     </select>
 
 </mapper>

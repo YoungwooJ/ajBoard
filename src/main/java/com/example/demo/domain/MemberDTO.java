@@ -11,5 +11,8 @@ public class MemberDTO {
     private String gender;
     private String phone;
     private String email;
-    private String flag;
+    private int level;
+    private String createdate;
+    private String updatedate;
+    private String remvFlag;
 }

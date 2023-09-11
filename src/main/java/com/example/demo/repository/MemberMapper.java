@@ -4,10 +4,20 @@ import com.example.demo.domain.MemberDTO;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
 public interface MemberMapper {
+
+    // 관리자 : 회원 권한 수정
+    int updateMemberGrade(MemberDTO memberDTO);
+
+    // 관리자 : 회원 목록
+    List<MemberDTO> selectMemberList();
+
+    // 스프링 시큐리티 로그인
+    MemberDTO findByUsername(String name);
 
     // 아이디 찾기
     MemberDTO findMemberId(MemberDTO memberDTO);
@@ -24,8 +34,6 @@ public interface MemberMapper {
     // 로그인
     MemberDTO login(MemberDTO memberDTO);
 
-    // ID, PW 찾기
-
     // 회원 비밀번호 수정
     int updateMemberPassword(MemberDTO memberDTO);
 
@@ -34,6 +42,4 @@ public interface MemberMapper {
     
     // 회원 탈퇴
     int deleteMember(MemberDTO memberDTO);
-    
-    // 세션 저장
 }

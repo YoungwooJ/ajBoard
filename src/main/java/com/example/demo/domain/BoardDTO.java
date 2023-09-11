@@ -11,5 +11,5 @@ public class BoardDTO {
     private int views;
     private String createdate;
     private String updatedate;
-    private String flag;
+    private String remvFlag;
 }

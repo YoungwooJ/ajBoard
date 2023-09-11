@@ -9,6 +9,7 @@ import java.util.Map;
 
 @Repository
 public interface BoardMapper {
+
     // 조회수 증가
     void increaseViews(int boardNo);
 
@@ -19,7 +20,7 @@ public interface BoardMapper {
     Map<String, Object> selectBoardOne(int boardNo);
 
     // 게시판 리스트 조회 및 검색
-    List<Map<String, Object>> selectBoardList(Map<String, Object> paramMap);
+    List<Map<String, Object>> selectBoardList(Map<String, Object> map);
 
     // 댓글, 대댓글
 

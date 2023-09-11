@@ -7,13 +7,13 @@
     <select id="selectCommentCount" parameterType="int" resultType="int">
         SELECT COUNT(*)
         FROM comment
-        WHERE board_no = #{boardNo} AND c_depth = 0;
+        WHERE board_no = #{boardNo} AND c_depth = 0 AND remv_flag = 'N';
     </select>
 
     <!--댓글 삭제-->
     <update id="deleteComment" parameterType="int">
         UPDATE comment
-        SET flag = 'Y'
+        SET remv_flag = 'Y'
         WHERE comment_no = #{commentNo};
     </update>
 
@@ -33,7 +33,7 @@
             , c_depth
             , c_group
             , createdate
-            , flag
+            , remv_flag
         ) VALUES (
              #{boardNo}
             , #{writer}
@@ -54,7 +54,7 @@
             , c_depth
             , c_group
             , createdate
-            , flag
+            , remv_flag
         ) VALUES (
             #{boardNo}
             , #{writer}
@@ -76,9 +76,9 @@
              , c_depth cdepth
              , c_group cgroup
              , createdate
-             , flag
+             , remv_flag remvFlag
         FROM comment
-        WHERE board_no = #{boardNo} AND flag = 'N' AND c_depth = 1
+        WHERE board_no = #{boardNo} AND remv_flag = 'N' AND c_depth = 1
         ORDER BY createdate ASC;
     </select>
     
@@ -90,9 +90,9 @@
              , writer
              , comment
              , createdate
-             , flag
+             , remv_flag remvFlag
         FROM comment
-        WHERE comment_no = #{commentNo} AND flag = 'N';
+        WHERE comment_no = #{commentNo} AND remv_flag = 'N';
     </select>
 
     <!--댓글 목록 출력-->
@@ -105,9 +105,9 @@
             , c_depth cdepth
             , c_group cgroup
             , createdate
-            , flag
+            , remv_flag remvFlag
         FROM comment
-        WHERE board_no = #{boardNo} AND flag = 'N' AND c_depth = 0
+        WHERE board_no = #{boardNo} AND remv_flag = 'N' AND c_depth = 0
         ORDER BY createdate ASC;
     </select>
 

@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.repository.BoardMapper">
+
     <!--조회수 증가-->
     <update id="increaseViews" parameterType="int">
         UPDATE board
@@ -13,8 +14,8 @@
     <select id="selectBoardCount" resultType="int">
         SELECT COUNT(*)
         FROM board
-        WHERE flag = 'N'
-        <if test="category != null"> AND </if>
+        WHERE remv_flag = 'N'
+        <if test="!''.equals(category) and category != null"> AND </if>
         <if test="'title'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'content'.equals(category) and search != null">content ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'writer'.equals(category) and search != null">writer ILIKE CONCAT('%',#{search},'%')</if>
@@ -23,7 +24,7 @@
     <!--게시글 삭제-->
     <delete id="deleteBoard" parameterType="int">
         UPDATE board
-        SET flag = 'Y'
+        SET remv_flag = 'Y'
         WHERE board_no = #{boardNo};
     </delete>
 
@@ -49,7 +50,7 @@
             , views
             , createdate
             , updatedate
-            , flag
+            , remv_flag
         ) VALUES (
             #{title}
             , #{content}
@@ -101,10 +102,10 @@
             , views
             , createdate
             , updatedate
-            , flag
+            , remv_flag remvFlag
         FROM board
-        WHERE flag = 'N'
-        <if test="category != null"> AND </if>
+        WHERE remv_flag = 'N'
+        <if test="!''.equals(category) and category != null"> AND </if>
         <if test="'title'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'content'.equals(category) and search != null">content ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'writer'.equals(category) and search != null">writer ILIKE CONCAT('%',#{search},'%')</if>

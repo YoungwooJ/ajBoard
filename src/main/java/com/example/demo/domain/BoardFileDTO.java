@@ -11,4 +11,5 @@ public class BoardFileDTO {
     private String fileType;
     private long fileSize;
     private String createdate;
+    private String remvFlag;
 }

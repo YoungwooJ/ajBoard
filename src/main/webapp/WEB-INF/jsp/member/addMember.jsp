@@ -5,9 +5,34 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>AJ</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+
+    <!--jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <!-- Bootstrap Templates-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <link rel="stylesheet" href="../font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../themes/prism-okaidia.css">
+    <link rel="stylesheet" href="../css/custom.min.css">
+    <!-- Global Site Tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23019901-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-23019901-1');
+    </script>
+
     <!-- 자바스크립트로 유효성 확인 -->
     <script>
         $(document).ready(function (){
@@ -18,7 +43,7 @@
 
             // 아이디 유효성 검사
             $('#id').blur(function(){
-                if($('#id').val() == ''){
+                if($('#id').val() == '' || idCk == false){
                     $('#msg').text('ID를 입력해주세요.');
                     $('#id').focus();
                 } else {
@@ -121,90 +146,127 @@
 
             // ID 중복체크
             $(document).on('click', '#idCheckBtn', function(){
-                $.ajax({
-                    url : '${pageContext.request.contextPath}/member/getIdCheck'
-                    , type : 'GET'
-                    , data : {"id" : $('#id').val()}
-                    , success : function(data){
-                        if(data == null || data == ""){
-                            alert("사용가능한 ID입니다.");
-                            $('#id').focus();
-                            idCk = true;
-                        } else if(data != null || data != "") {
-                            alert("중복된 ID입니다.");
-                            $('#id').focus();
+                if($('#id').val() == ''){
+                    $('#msg').text('ID를 입력해주세요.');
+                    $('#id').focus();
+                } else {
+                    $.ajax({
+                        url : '${pageContext.request.contextPath}/member/getIdCheck'
+                        , type : 'GET'
+                        , data : {"id" : $('#id').val()}
+                        , success : function(data){
+                            if(data == null || data == ""){
+                                alert("사용가능한 ID입니다.");
+                                $('#id').focus();
+                                idCk = true;
+                            } else if(data != null || data != "") {
+                                alert("중복된 ID입니다.");
+                                $('#id').val('');
+                                $('#id').focus();
+                            }
                         }
-                    }
-                    , error : function (error){
-                        alert("ID 중복체크 실패");
-                    }
-                })
+                        , error : function (error){
+                            alert("ID 중복체크 실패");
+                        }
+                    })
+                }
             });
         });
     </script>
+    <style>
+        th {
+            text-align: center;
+        }
+        table {
+            border: 1px #BDBDBD solid;
+            font-size: .9em;
+            box-shadow: 0 2px 5px #BDBDBD;
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        a {
+            text-decoration: none;
+        }
+        .box:hover {
+            outline: none !important;
+            border-color: #747474;
+            box-shadow: 0 0 10px #747474;
+        }
+        .container {
+            display-inline : center;
+        }
+    </style>
 </head>
 <body>
-<h2>회원가입</h2>
-<div style="color:red;" id="msg">
-    ${msg}
-</div>
-<form method="post" id="addForm" action="${pageContext.request.contextPath}/member/addMember">
-    <table border="1">
-        <tr>
-            <td>아이디</td>
-            <td>
-                <input type="text" id="id" name="id" value="">
-                <button id="idCheckBtn" type="button">중복확인</button>
-            </td>
-        </tr>
-        <tr>
-            <td>비밀번호</td>
-            <td>
-                <input type="password" id="password" name="password" value="">
-            </td>
-        </tr>
-        <tr>
-            <td>이름</td>
-            <td>
-                <input type="text" id="name" name="name" value="">
-            </td>
-        </tr>
-        <tr>
-            <td>생년월일</td>
-            <td>
-                <input type="date" id="birth" name="birth" value="">
-            </td>
-        </tr>
-        <tr>
-            <td>성별</td>
-            <td>
-                <input type="radio" id="gender" name="gender" value="M">남
-                <input type="radio" name="gender" value="F">여
-            </td>
-        </tr>
-        <tr>
-            <td>핸드폰</td>
-            <td>
-                <input type="text" id="phone" name="phone" value="" placeholder="ex) 010-1234-1234">
-            </td>
-        </tr>
-        <tr>
-            <td>이메일 주소</td>
-            <td>
-                <input type="text" id="email" name="email" value="">
-                @
-                <select id="address" name="address">
-                    <option selected="selected" value="">선택하세요.</option>
-                    <option value="naver.com">naver.com</option>
-                    <option value="daum.net">daum.net</option>
-                    <option value="kakao.com">kakao.com</option>
-                    <option value="gmail.com">gmail.com</option>
-                    <option value="noAddress">직접 입력</option>
-                </select>
-            </td>
-        </tr>
-    </table>
-    <button id="addBtn" type="button">회원가입</button>
-</form>
+    <%--Header--%>
+    <c:import url="../../inc/header.jsp"></c:import>
+    <br>
+    <div class="container">
+        <br>
+        <h2>회원가입</h2>
+        <div style="color:red;" id="msg">
+            ${msg}
+        </div>
+        <form method="post" id="addForm" action="${pageContext.request.contextPath}/member/addMember">
+            <table class="table table-bordered w-50">
+                <tr>
+                    <td>아이디</td>
+                    <td>
+                        <input class="box form-control" type="text" id="id" name="id" value="">
+                        <button class="btn btn-info" id="idCheckBtn" type="button">중복확인</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>비밀번호</td>
+                    <td>
+                        <input class="box form-control" type="password" id="password" name="password" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td>이름</td>
+                    <td>
+                        <input class="box form-control" type="text" id="name" name="name" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td>생년월일</td>
+                    <td>
+                        <input class="box form-control" type="date" id="birth" name="birth" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td>성별</td>
+                    <td>
+                        <input class="box" type="radio" id="gender" name="gender" value="M">남
+                        <input class="box" type="radio" name="gender" value="F">여
+                    </td>
+                </tr>
+                <tr>
+                    <td>핸드폰</td>
+                    <td>
+                        <input class="box form-control" type="text" id="phone" name="phone" value="" placeholder="ex) 010-1234-1234">
+                    </td>
+                </tr>
+                <tr>
+                    <td>이메일 주소</td>
+                    <td>
+                        <input class="box form-control" type="text" id="email" name="email" value="">
+                        @
+                        <select class="box form-control" id="address" name="address">
+                            <option selected="selected" value="">선택하세요.</option>
+                            <option value="naver.com">naver.com</option>
+                            <option value="daum.net">daum.net</option>
+                            <option value="kakao.com">kakao.com</option>
+                            <option value="gmail.com">gmail.com</option>
+                            <option value="noAddress">직접 입력</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <button class="btn btn-info" id="addBtn" type="button">회원가입</button>
+        </form>
+    </div>
 </body>
 </html>

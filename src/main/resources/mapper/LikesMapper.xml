@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.LikesMapper">
+
+    <!--좋아요 삭제-->
+    <delete id="deleteLikes" parameterType="int">
+        DELETE likes
+        WHERE likes_no = #{likesNo}
+    </delete>
+
+    <!--좋아요 추가-->
+    <insert id="insertLikes" parameterType="com.example.demo.domain.LikesDTO">
+        INSERT INTO likes (
+            id
+            , board_no
+            , comment_no
+            , createdate
+        ) VALUES (
+            #{id}
+            , <if test="boardNo != null and !boardNo.equals('')">#{boardNo}</if>
+            <if test="boardNo == null or boardNo.equals('')">0</if>
+            , <if test="commentNo != null and !commentNo.equals('')">#{commentNo}</if>
+            <if test="commentNo == null or commentNo.equals('')">0</if>
+            , CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!--좋아요 여부-->
+    <select id="selectLikesOne" parameterType="map" resultType="com.example.demo.domain.LikesDTO">
+        SELECT
+            likes_no likesNo
+            , id
+            , board_no boardNo
+            , comment_no commentNo
+            , createdate
+        FROM likes
+        WHERE id = #{id}
+        <if test="boardNo != 0">AND board_no = #{boardNo}</if>
+        <if test="commentNo != 0">AND comment_no = #{commentNo}</if>
+    </select>
+
+    <!--좋아요 출력-->
+    <select id="selectLikesCount" parameterType="map" resultType="int">
+        SELECT
+            COUNT(likes_no)
+        FROM likes
+        WHERE
+        <if test="boardNo != 0 and commentNo != 0">board_no = #{boardNo} AND comment_no = #{commentNo}</if>
+        <if test="boardNo != 0 and commentNo == 0">board_no = #{boardNo}</if>
+        <if test="boardNo == 0 and commentNo != 0">comment_no = #{commentNo}</if>
+    </select>
+
+</mapper>

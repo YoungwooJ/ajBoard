@@ -20,6 +20,13 @@
 
     <dependencies>
 
+        <!--스프링 시큐리티-->
+        <!--<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>-->
+
+        <!--PW 찾기 시 임시 비밀번호 이메일 발급-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
