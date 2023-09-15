@@ -10,6 +10,20 @@
         WHERE board_no = #{boardNo} AND c_depth = 0 AND remv_flag = 'N';
     </select>
 
+    <!--댓글 삭제 시 대댓글 삭제-->
+    <update id="deleteReplyForDeleteComment" parameterType="int">
+        UPDATE comment
+        SET remv_flag = 'Y'
+        WHERE c_group = #{cgroup};
+    </update>
+
+    <!--게시물 삭제 시 댓글 삭제-->
+    <update id="deleteCommentForDeleteBoard" parameterType="int">
+        UPDATE comment
+        SET remv_flag = 'Y'
+        WHERE board_no = #{boardNo};
+    </update>
+
     <!--댓글 삭제-->
     <update id="deleteComment" parameterType="int">
         UPDATE comment
@@ -89,6 +103,8 @@
              , board_no boardNo
              , writer
              , comment
+             , c_depth cdepth
+             , c_group cgroup
              , createdate
              , remv_flag remvFlag
         FROM comment

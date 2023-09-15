@@ -26,17 +26,52 @@ public class MemberService {
     private final JavaMailSender mailSender;
     private static final String FROM_ADDRESS = "cyw960714@naver.com";
 
+    // 관리자 : 강제 탈퇴
+    public String removeMemberForced(MemberDTO memberDTO) {
+        String address = null;
+        try {
+            if(memberDTO == null || "".equals(memberDTO)) {
+                String msg = URLEncoder.encode("회원정보를 입력해주세요.", "UTF-8");
+                address = "redirect:/member/getMemberList?msg=" + msg;
+            } else {
+                memberMapper.deleteMember(memberDTO);
+                String msg = URLEncoder.encode("강제 탈퇴가 완료 되었습니다.", "UTF-8");
+                address = "redirect:/member/getMemberList?msg=" + msg;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
+    }
+
     // 관리자 : 회원 권한 수정
-    public int modifyMemberGrade(HttpSession session, MemberDTO memberDTO) {
-        MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-        loginMember.setLevel(memberDTO.getLevel());
+    public String modifyMemberGrade(HttpSession session, MemberDTO memberDTO) {
+        String address = null;
+        try {
+            if(memberDTO == null || "".equals(memberDTO)) {
+                String msg = URLEncoder.encode("회원정보를 입력해주세요.", "UTF-8");
+                address = "redirect:/member/getMemberList?msg=" + msg;
+            } else {
+                MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+                loginMember.setLevel(memberDTO.getLevel());
+                /*세션 삭제*/
+                session.removeAttribute("loginMember");
+                /*세션 수정*/
+                session.setAttribute("loginMember", loginMember);
 
-        /*세션 삭제*/
-        session.removeAttribute("loginMember");
-        /*세션 수정*/
-        session.setAttribute("loginMember", loginMember);
-
-        return memberMapper.updateMemberGrade(memberDTO);
+                int row = memberMapper.updateMemberGrade(memberDTO);
+                // row == 1 이면 입력 성공
+                if (row == 0) {
+                    String msg = URLEncoder.encode("시스템 에러로 변경 실패하였습니다.", "UTF-8");
+                    address = "redirect:/member/getMemberList?msg=" + msg;
+                }
+                String msg = URLEncoder.encode("회원 권한이 변경되었습니다.", "UTF-8");
+                address = "redirect:/member/getMemberList?msg=" + msg;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
     }
 
     // 관리자 : 회원 목록
@@ -45,13 +80,31 @@ public class MemberService {
     }
 
     // 아이디 찾기
-    public MemberDTO findMemberId(MemberDTO memberDTO) {
-        if(memberDTO.getGender().equals("M")){
-            memberDTO.setGender("남자");
-        } else {
-            memberDTO.setGender("여자");
+    public String findMemberId(MemberDTO memberDTO) {
+        String address = null;
+        try {
+            if(memberDTO == null || "".equals(memberDTO)) {
+                String msg = URLEncoder.encode("회원정보를 입력해주세요.", "UTF-8");
+                address = "redirect:/member/findMemberId?msg=" + msg;
+            } else {
+                if (memberDTO.getGender().equals("M")) {
+                    memberDTO.setGender("남자");
+                } else {
+                    memberDTO.setGender("여자");
+                }
+                MemberDTO member = memberMapper.findMemberId(memberDTO);
+                // 오류 메시지 및 알림
+                if (member == null) {
+                    String msg = URLEncoder.encode("등록된 회원정보가 없습니다.", "UTF-8");
+                    address = "redirect:/member/findMemberId?msg=" + msg;
+                } else {
+                    address = "redirect:/member/findMemberIdResult?memberId=" + member.getId();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return memberMapper.findMemberId(memberDTO);
+        return address;
     }
 
     // 이메일 발송
@@ -99,7 +152,6 @@ public class MemberService {
 
     // Email과 id의 일치여부를 check
     public boolean getEmailCheck(MemberDTO memberDTO) {
-
         MemberDTO member = memberMapper.selectEmailCheck(memberDTO);
         if(member != null) {
             return true;
@@ -109,24 +161,52 @@ public class MemberService {
     }
 
     // 회원가입
-    public int addMember(MemberDTO memberDTO, String address) {
-        // 성별 한글로 바꿔주기
-        String gender = memberDTO.getGender();
-        if("M".equals(gender)) {
-            memberDTO.setGender("남자");
-        } else {
-            memberDTO.setGender("여자");
+    public String addMember(MemberDTO memberDTO, String address) {
+        String returnAddress = null;
+        try {
+            if("".equals(memberDTO) || memberDTO == null) {
+                String msg = URLEncoder.encode("회원 가입 정보를 모두 입력해주세요.", "UTF-8");
+                returnAddress = "redirect:/member/addMember?msg=" + msg;
+            } else {
+                // 중복 아이디 체크
+                MemberDTO idCheck = memberMapper.selectIdCheck(memberDTO.getId());
+                // 오류 메시지 및 알림
+                if (idCheck != null) {
+                    String msg = URLEncoder.encode("중복된ID입니다.", "UTF-8");
+                    returnAddress = "redirect:/member/addMember?msg=" + msg;
+                } else {
+                    // 성별 한글로 바꿔주기
+                    String gender = memberDTO.getGender();
+                    if ("M".equals(gender)) {
+                        memberDTO.setGender("남자");
+                    } else {
+                        memberDTO.setGender("여자");
+                    }
+                    // 이메일 주소가 직접 입력이 아니라면
+                    if (!"noAddress".equals(address)) {
+                        String email = memberDTO.getEmail() + "@" + address;
+                        memberDTO.setEmail(email);
+                    }
+                    // 비밀번호 암호화
+                    /*String rawPassword = memberDTO.getPassword();
+                    String encPassword = bCryptPasswordEncoder.encode(rawPassword);
+                    memberDTO.setPassword(encPassword);*/
+                    // 회원가입
+                    int row = memberMapper.insertMember(memberDTO);
+                    // row == 1 이면 입력 성공
+                    if (row == 0) {
+                        // 오류 메시지 및 알림
+                        String msg = URLEncoder.encode("시스템 에러로 등록 실패하였습니다.", "UTF-8");
+                        returnAddress = "redirect:/member/addMember?msg=" + msg;
+                    }
+                    String msg = URLEncoder.encode("회원 가입이 완료되었습니다.", "UTF-8");
+                    returnAddress = "redirect:/member/loginMember?msg=" + msg;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        // 이메일 주소가 직접 입력이 아니라면
-        if(! "noAddress".equals(address)) {
-            String email = memberDTO.getEmail() + "@" + address;
-            memberDTO.setEmail(email);
-        }
-        // 비밀번호 암호화
-        /*String rawPassword = memberDTO.getPassword();
-        String encPassword = bCryptPasswordEncoder.encode(rawPassword);
-        memberDTO.setPassword(encPassword);*/
-        return memberMapper.insertMember(memberDTO);
+        return returnAddress;
     }
 
     // ID 중복체크
@@ -135,34 +215,52 @@ public class MemberService {
     }
 
     // 로그인
-    public MemberDTO login(MemberDTO memberDTO) {
-        return memberMapper.login(memberDTO);
+    public String login(HttpSession session, MemberDTO memberDTO) {
+        String address = null;
+        try {
+            MemberDTO resultMember = memberMapper.login(memberDTO);
+            if ("".equals(resultMember) || resultMember == null) {
+                String msg = URLEncoder.encode("아이디와 비밀번호가 틀렸습니다.", "UTF-8");
+                address = "redirect:/member/loginMember?msg="+msg;
+            } else {
+                session.setAttribute("loginMember", resultMember);
+                address = "redirect:/home";
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
     }
 
     // 회원 비밀번호 수정
     public String modifyMemberPassword(HttpSession session, String newPassword, String oldPassword) {
         String address = null;
         try {
-            MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-            MemberDTO memberDTO = new MemberDTO();
-            // 비밀번호 확인
-            if (oldPassword.equals(loginMember.getPassword())) {
-                memberDTO.setId(loginMember.getId());
-                memberDTO.setPassword(newPassword);
-                int row = memberMapper.updateMemberPassword(memberDTO);
-                // row == 1 이면 입력 성공
-                if (row == 0) {
-                    String msg = URLEncoder.encode("시스템 에러로 변경 실패하였습니다.", "UTF-8");
-                    address = "redirect:/member/modifyMemberPw?msg="+msg;
-                } else {
-                    /*로그아웃*/
-                    session.invalidate();
-                    String msg = URLEncoder.encode("비밀번호가 변경되었습니다.", "UTF-8");
-                    address = "redirect:/home?msg="+msg;
-                }
+            if("".equals(newPassword) || "".equals(oldPassword) || newPassword == null || oldPassword == null) {
+                String msg = URLEncoder.encode("비밀번호를 입력하세요.", "UTF-8");
+                address = "redirect:/member/modifyMemberPw?msg=" + msg;
             } else {
-                String msg = URLEncoder.encode("비밀번호를 확인하세요.", "UTF-8");
-                address = "redirect:/member/modifyMemberPw?msg="+msg;
+                MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+                MemberDTO memberDTO = new MemberDTO();
+                // 비밀번호 확인
+                if (oldPassword.equals(loginMember.getPassword())) {
+                    memberDTO.setId(loginMember.getId());
+                    memberDTO.setPassword(newPassword);
+                    int row = memberMapper.updateMemberPassword(memberDTO);
+                    // row == 1 이면 입력 성공
+                    if (row == 0) {
+                        String msg = URLEncoder.encode("시스템 에러로 변경 실패하였습니다.", "UTF-8");
+                        address = "redirect:/member/modifyMemberPw?msg=" + msg;
+                    } else {
+                        /*로그아웃*/
+                        session.invalidate();
+                        String msg = URLEncoder.encode("비밀번호가 변경되었습니다.", "UTF-8");
+                        address = "redirect:/home?msg=" + msg;
+                    }
+                } else {
+                    String msg = URLEncoder.encode("비밀번호를 확인하세요.", "UTF-8");
+                    address = "redirect:/member/modifyMemberPw?msg=" + msg;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -250,7 +348,24 @@ public class MemberService {
     }
 
     // 회원 탈퇴
-    public int removeMember(MemberDTO memberDTO) {
-        return memberMapper.deleteMember(memberDTO);
+    public String removeMember(HttpSession session) {
+        String address = null;
+        try {
+            MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+            if("".equals(loginMember) || loginMember == null) {
+                String msg = URLEncoder.encode("로그인 해주세요.", "UTF-8");
+                address = "redirect:/home?msg=" + msg;
+            } else {
+                memberMapper.deleteMember(loginMember);
+                /*로그아웃*/
+                session.invalidate();
+                String msg = URLEncoder.encode("회원탈퇴가 완료되었습니다.", "UTF-8");
+                address = "redirect:/home?msg=" + msg;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
     }
 }
+

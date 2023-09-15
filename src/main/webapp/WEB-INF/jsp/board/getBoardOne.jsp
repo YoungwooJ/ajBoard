@@ -138,7 +138,7 @@
                })
             });
 
-            // 댓글 좋아요 클릭시 좋아요 등록 및 증가
+            /*// 댓글 좋아요 클릭시 좋아요 등록 및 증가
             $('.cLikesBtn').click(function () {
                 $.ajax({
                     url : '${pageContext.request.contextPath}/likes/getLikesOne'
@@ -177,7 +177,7 @@
                         alert("좋아요 조회 실패");
                     }
                 })
-            });
+            });*/
         });
     </script>
     <style>
@@ -300,11 +300,11 @@
                 <div>
                     ${c.comment}
                     <input type="hidden" name="commentNo" class="commentNo" value="${c.commentNo}">
-                    <c:forEach var="l" items="${commentLikesList}" varStatus="status">
+                    <%--<c:forEach var="l" items="${commentLikesList}" varStatus="status">
                         <c:if test="${c.commentNo eq l.commentNo}">
                             <a type="button" class="cLikesBtn" data-value="${c.commentNo}">
                                 <span class="heart" style="color:red;">
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♥&nbsp;<%--${commentLikesCount}--%>&nbsp;
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♥&nbsp;&lt;%&ndash;${commentLikesCount}&ndash;%&gt;&nbsp;
                                     <input type="hidden" name="cLikesNo" class="cLikesNo" value="${l.likesNo}">
                                 </span>
                             </a>
@@ -312,11 +312,11 @@
                         <c:if test="${c.commentNo ne l.commentNo && cs.index eq status.index}">
                             <a type="button" class="cLikesBtn" data-value="${c.commentNo}">
                                 <span>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♡&nbsp;<%--${commentLikesCount}--%>&nbsp;
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♡&nbsp;&lt;%&ndash;${commentLikesCount}&ndash;%&gt;&nbsp;
                                 </span>
                             </a>
                         </c:if>
-                    </c:forEach>
+                    </c:forEach>--%>
                 </div>
                 <c:if test="${c.writer eq loginMember.id || loginMember.level eq 1}">
                     <div>
@@ -334,19 +334,19 @@
                             ${r.comment}
                             <a type="button" class="rLikesBtn">
                                 <input type="hidden" name="commentNo" class="commentNo" value="${r.commentNo}">
-                                <c:forEach var="l" items="${replyLikesList}" varStatus="status">
+                                <%--<c:forEach var="l" items="${replyLikesList}" varStatus="status">
                                     <c:if test="${r.commentNo eq l.commentNo}">
                                         <span class="heart" style="color:red;">
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♥&nbsp;<%--${commentLikesCount}--%>&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♥&nbsp;&lt;%&ndash;${commentLikesCount}&ndash;%&gt;&nbsp;
                                             <input type="hidden" name="rLikesNo" class="rLikesNo" value="${l.likesNo}">
                                         </span>
                                     </c:if>
                                     <c:if test="${r.commentNo ne l.commentNo && rs.index eq status.index}">
                                         <span>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♡&nbsp;<%--${commentLikesCount}--%>&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;♡&nbsp;&lt;%&ndash;${commentLikesCount}&ndash;%&gt;&nbsp;
                                         </span>
                                     </c:if>
-                                </c:forEach>
+                                </c:forEach>--%>
                             </a>
                         </div>
                         <c:if test="${r.writer eq loginMember.id || loginMember.level eq 1}">

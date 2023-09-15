@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +69,7 @@ public class BoardController {
         List<CommentDTO> commentList = commentService.getCommentList(boardNo);
         if(commentList != null){
             model.addAttribute("commentList", commentList);
-            for (CommentDTO c : commentList) {
+            /*for (CommentDTO c : commentList) {
                 int commentNo = c.getCommentNo();
                 LikesDTO l = likesService.getLikesOne(0, commentNo, id);
                 commentLikesList.add(l);
@@ -80,14 +78,14 @@ public class BoardController {
                 commentLikesCount.add(commentCount);
             }
             model.addAttribute("commentLikesCount", commentLikesCount);
-            model.addAttribute("commentLikesList", commentLikesList);
+            model.addAttribute("commentLikesList", commentLikesList);*/
         }
 
         // 대댓글 목록
         List<CommentDTO> replyList = commentService.getReplyList(boardNo);
         if(replyList != null){
             model.addAttribute("replyList", replyList);
-            for (CommentDTO r : replyList) {
+            /*for (CommentDTO r : replyList) {
                 int commentNo = r.getCommentNo();
                 LikesDTO l = likesService.getLikesOne(0, commentNo, id);
                 replyLikesList.add(l);
@@ -96,7 +94,7 @@ public class BoardController {
                 replyLikesCount.add(replyCount);
             }
             model.addAttribute("replyLikesCount", replyLikesCount);
-            model.addAttribute("replyLikesList", replyLikesList);
+            model.addAttribute("replyLikesList", replyLikesList);*/
         }
 
         // 댓글 개수
@@ -104,47 +102,8 @@ public class BoardController {
         model.addAttribute("countComment", countComment);
 
         // 조회수 증가
-        Cookie viewCookie=null;
-        Cookie[] cookies=request.getCookies();
-        System.out.println("cookie : "+cookies);
-
-        if(cookies !=null) {
-            for (int i = 0; i < cookies.length; i++) {
-                //System.out.println("쿠키 이름 : "+cookies[i].getName());
-
-                //만들어진 쿠키들을 확인하며, 만약 들어온 적 있다면 생성되었을 쿠키가 있는지 확인
-                if(cookies[i].getName().equals("|"+id+"|")) {
-                    System.out.println("if문 쿠키 이름 : "+cookies[i].getName());
-
-                    //찾은 쿠키를 변수에 저장
-                    viewCookie=cookies[i];
-                }
-            }
-        }else {
-            System.out.println("cookies 확인 로직 : 쿠키가 없습니다.");
-        }
-
-        //만들어진 쿠키가 없음을 확인
-        if(viewCookie==null) {
-            System.out.println("viewCookie 확인 로직 : 쿠키 없당");
-            try {
-                //이 페이지에 왔다는 증거용 쿠키 생성
-                Cookie newCookie=new Cookie("|"+id+"|","readCount");
-                response.addCookie(newCookie);
-                //쿠키가 없으니 증가 로직 진행
-                if(!loginMember.getId().equals((String) map.get("WRITER"))) {
-                    boardService.increaseViews(boardNo);
-                }
-            } catch (Exception e) {
-                System.out.println("쿠키 넣을때 오류 나나? : "+e.getMessage());
-                e.getStackTrace();
-            }
-            //만들어진 쿠키가 있으면 증가로직 진행하지 않음
-        }else {
-            System.out.println("viewCookie 확인 로직 : 쿠키 있당");
-            String value=viewCookie.getValue();
-            System.out.println("viewCookie 확인 로직 : 쿠키 value : "+value);
-        }
+        String writer = (String)map.get("WRITER");
+        boardService.increaseViewsWithCookie(session, request, response, id, boardNo, writer);
 
         return "/board/getBoardOne";
     }
@@ -194,7 +153,7 @@ public class BoardController {
         return "/board/addBoard";
     }
     @PostMapping("/board/addBoard")
-    public String addBoard(HttpServletRequest request, BoardFormDTO boardFormDTO) throws Exception {
+    public String addBoard(HttpServletRequest request, BoardFormDTO boardFormDTO) {
         String path = request.getServletContext().getRealPath("/boardFile-upload/");
         String address = boardService.addBoard(boardFormDTO, path);
         return address;
@@ -215,7 +174,7 @@ public class BoardController {
         return "/board/modifyBoard";
     }
     @PostMapping("/board/modifyBoard")
-    public String modifyBoard(BoardDTO boardDTO) throws Exception {
+    public String modifyBoard(BoardDTO boardDTO) {
         String address = boardService.modifyBoard(boardDTO);
         return address;
     }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
-import java.net.URLEncoder;
+import java.io.PrintWriter;
 import java.util.List;
 
 @Controller
@@ -20,39 +20,35 @@ public class MemberController {
 
     // 관리자 : 강제 탈퇴
     @PostMapping("/member/removeMemberForced")
-    public String removeMember(Model model, MemberDTO memberDTO) throws Exception {
-
-        memberService.removeMember(memberDTO);
-        String msg = URLEncoder.encode("강제 탈퇴가 완료 되었습니다.", "UTF-8");
-        return "redirect:/member/getMemberList?msg="+msg;
+    public String removeMember(MemberDTO memberDTO) {
+        String address = memberService.removeMemberForced(memberDTO);
+        return address;
     }
 
     // 관리자 : 회원 권한 수정
     @PostMapping("/member/modifyMemberGrade")
-    public String modifyMemberGrade(HttpSession session, Model model, MemberDTO memberDTO) throws Exception {
-
-        int row = memberService.modifyMemberGrade(session, memberDTO);
-        // row == 1 이면 입력 성공
-        if(row == 0) {
-            model.addAttribute("msg", "시스템 에러로 변경 실패하였습니다.");
-            return "/member/getMemberList";
-        }
-
-        String msg = URLEncoder.encode("회원 권한이 변경되었습니다.", "UTF-8");
-        return "redirect:/member/getMemberList?msg="+msg;
+    public String modifyMemberGrade(HttpSession session, MemberDTO memberDTO) {
+        String address = memberService.modifyMemberGrade(session, memberDTO);
+        return address;
     }
 
     // 관리자 : 회원 목록
     @GetMapping("/member/getMemberList")
-    public String getMemberList(Model model
+    public String getMemberList(HttpSession session, Model model
                                     , @RequestParam(value="msg", required = false) String msg) {
-        List<MemberDTO> list =  memberService.getMemberList();
-        model.addAttribute("list", list);
-        // 메시지가 있을시
-        if(msg != null) {
-            model.addAttribute("msg", msg);
+        MemberDTO loginMember = (MemberDTO)session.getAttribute("loginMember");
+        if(loginMember.getLevel() == 1) {
+            List<MemberDTO> list = memberService.getMemberList();
+            model.addAttribute("list", list);
+            // 메시지가 있을시
+            if (msg != null) {
+                model.addAttribute("msg", msg);
+            }
+            return "/member/getMemberList";
+        } else {
+            model.addAttribute("msg", "관리자만 사용할 수 있습니다.");
+            return "/home";
         }
-        return "/member/getMemberList";
     }
 
     // 비밀번호 찾기
@@ -67,16 +63,9 @@ public class MemberController {
         return "/member/findMemberId";
     }
     @PostMapping("/member/findMemberId")
-    public String findMemberId(Model model, MemberDTO memberDTO) {
-
-        MemberDTO member = memberService.findMemberId(memberDTO);
-
-        // 오류 메시지 및 알림
-        if(member == null ){
-            model.addAttribute("msg", "등록된 회원정보가 없습니다.");
-            return "/member/findMemberId";
-        }
-        return "redirect:/member/findMemberIdResult?memberId="+member.getId();
+    public String findMemberId(MemberDTO memberDTO) {
+        String address = memberService.findMemberId(memberDTO);
+        return address;
     }
     @GetMapping("/member/findMemberIdResult")
     public String findMemberIdResult(Model model
@@ -103,25 +92,10 @@ public class MemberController {
         return "/member/addMember";
     }
     @PostMapping("/member/addMember")
-    public String addMember(Model model, MemberDTO memberDTO
-                                , @RequestParam(value="address", required = true) String address) throws Exception {
-        // 중복 아이디 체크
-        MemberDTO idCheck = memberService.getIdCheck(memberDTO.getId());
-        // 오류 메시지 및 알림
-        if(idCheck != null) {
-            model.addAttribute("msg", "중복된ID입니다.");
-            return "redirect:/member/addMember";
-        }
-        // 회원가입
-        int row = memberService.addMember(memberDTO, address);
-        // row == 1 이면 입력 성공
-        if(row == 0) {
-            // 오류 메시지 및 알림
-            model.addAttribute("msg", "시스템 에러로 등록 실패하였습니다.");
-            return "redirect:/member/addMember";
-        }
-        String msg = URLEncoder.encode("회원 가입이 완료되었습니다.", "UTF-8");
-        return "redirect:/member/loginMember?msg="+msg;
+    public String addMember(MemberDTO memberDTO
+                                , @RequestParam(value="address", required = true) String address) {
+        String returnAddress = memberService.addMember(memberDTO, address);
+        return returnAddress;
     }
 
     // 로그인
@@ -132,14 +106,9 @@ public class MemberController {
         return "/member/loginMember";
     }
     @PostMapping("/member/loginMember")
-    public String login(Model model, HttpSession session, MemberDTO memberDTO){
-        MemberDTO resultMember = memberService.login(memberDTO);
-        session.setAttribute("loginMember", resultMember);
-        if("".equals(resultMember) || resultMember == null) {
-            model.addAttribute("msg", "아이디와 비밀번호가 틀렸습니다.");
-            return "/member/loginMember";
-        }
-        return "redirect:/home";
+    public String login(HttpSession session, MemberDTO memberDTO){
+        String address = memberService.login(session, memberDTO);
+        return address;
     }
 
     // 로그아웃
@@ -186,7 +155,7 @@ public class MemberController {
         return "/member/modifyMember";
     }
     @PostMapping("/member/modifyMember")
-    public String modifyMember(HttpSession session, Model model, MemberDTO memberDTO
+    public String modifyMember(HttpSession session, MemberDTO memberDTO
                                     , @RequestParam(value="address", required = true) String address
                                     , @RequestParam(value="oldId", required = true) String oldId
                                     , @RequestParam(value="oldName", required = true) String oldName
@@ -200,12 +169,8 @@ public class MemberController {
 
     // 회원 탈퇴
     @GetMapping("/member/removeMember")
-    public String removeMember(HttpSession session, Model model) {
-        MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-        memberService.removeMember(loginMember);
-        /*로그아웃*/
-        session.invalidate();
-        model.addAttribute("msg", "회원탈퇴가 완료되었습니다.");
-        return "/home";
+    public String removeMember(HttpSession session) {
+        String address = memberService.removeMember(session);
+        return address;
     }
 }

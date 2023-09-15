@@ -3,15 +3,26 @@ package com.example.demo.service;
 import com.example.demo.domain.BoardDTO;
 import com.example.demo.domain.BoardFileDTO;
 import com.example.demo.domain.BoardFormDTO;
+import com.example.demo.domain.MemberDTO;
 import com.example.demo.repository.BoardFileMapper;
 import com.example.demo.repository.BoardMapper;
+import com.example.demo.repository.CommentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
 import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +33,7 @@ import java.util.UUID;
 public class BoardService {
     @Autowired BoardMapper boardMapper;
     @Autowired BoardFileMapper boardFileMapper;
+    @Autowired CommentMapper commentMapper;
 
     // 게시글 개수 카운트
     public int getBoardCount(String category, String search) {
@@ -37,9 +49,53 @@ public class BoardService {
         return boardMapper.selectBoardOne(boardNo);
     }
 
-    // 조회수 증가
-    public void increaseViews(int boardNo) {
-        boardMapper.increaseViews(boardNo);
+    // 쿠키 확인 후 조회수 증가
+    public void increaseViewsWithCookie(HttpSession session, HttpServletRequest request, HttpServletResponse response, String id, int boardNo, String writer) {
+        MemberDTO loginMember = (MemberDTO)session.getAttribute("loginMember");
+        Cookie viewCookie = null;
+        Cookie[] cookies=request.getCookies();
+        /*System.out.println("cookie : "+cookies);*/
+
+        if(cookies !=null) {
+            for (int i = 0; i < cookies.length; i++) {
+                //System.out.println("쿠키 이름 : "+cookies[i].getName());
+                //만들어진 쿠키들을 확인하며, 만약 들어온 적 있다면 생성되었을 쿠키가 있는지 확인
+                if(cookies[i].getName().equals("|"+id+boardNo+"|")) {
+                    /*System.out.println("if문 쿠키 이름 : "+cookies[i].getName());*/
+                    //찾은 쿠키를 변수에 저장
+                    viewCookie=cookies[i];
+                }
+            }
+        }else {
+            /*System.out.println("cookies 확인 로직 : 쿠키가 없습니다.");*/
+        }
+        //만들어진 쿠키가 없음을 확인
+        if(viewCookie==null) {
+            /*System.out.println("viewCookie 확인 로직 : 쿠키 없다");*/
+            try {
+                //이 페이지에 왔다는 증거용 쿠키 생성
+                Cookie newCookie=new Cookie("|"+id+boardNo+"|","readCount");
+                response.addCookie(newCookie);
+                //쿠키가 없으니 증가 로직 진행 + 타인의 게시물일 때만 증가
+                if(!loginMember.getId().equals(writer)) {
+                    boardMapper.increaseViews(boardNo);
+                }
+                // 쿠키 유지시간을 오늘 하루 자정까지로 설정
+                long todayEndSecond = LocalDate.now().atTime(LocalTime.MAX).toEpochSecond(ZoneOffset.UTC);
+                long currentSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+                viewCookie.setPath("/"); // 모든 경로에서 접근 가능
+                viewCookie.setMaxAge((int) (todayEndSecond - currentSecond));
+                response.addCookie(viewCookie);
+            } catch (Exception e) {
+                /*System.out.println("쿠키 넣을때 오류 나나? : "+e.getMessage());*/
+                e.getStackTrace();
+            }
+            //만들어진 쿠키가 있으면 증가로직 진행하지 않음
+        }else {
+            /*System.out.println("viewCookie 확인 로직 : 쿠키 있다");*/
+            String value=viewCookie.getValue();
+            /*System.out.println("viewCookie 확인 로직 : 쿠키 value : "+value);*/
+        }
     }
 
     // 게시판 리스트 조회 및 검색
@@ -145,15 +201,16 @@ public class BoardService {
             if(boardDTO.getContent().equals("") || boardDTO.getContent() == null) {
                 String msg = URLEncoder.encode("내용을 입력해주세요.", "UTF-8");
                 address = "redirect:/board/modifyBoard?boardNo="+boardDTO.getBoardNo()+"&msg="+msg;
-            }
-            int row = boardMapper.updateBoard(boardDTO);
-            // row != 0 이면 수정 성공
-            if(row == 0) {
-                String msg = URLEncoder.encode("수정 실패하였습니다.", "UTF-8");
-                address = "redirect:/board/modifyBoard?boardNo="+boardDTO.getBoardNo()+"&msg="+msg;
             } else {
-                String msg = URLEncoder.encode("게시물을 수정하였습니다.", "UTF-8");
-                address = "redirect:/board/getBoardOne?boardNo="+boardDTO.getBoardNo()+"&msg="+msg;
+                int row = boardMapper.updateBoard(boardDTO);
+                // row != 0 이면 수정 성공
+                if (row == 0) {
+                    String msg = URLEncoder.encode("수정 실패하였습니다.", "UTF-8");
+                    address = "redirect:/board/modifyBoard?boardNo=" + boardDTO.getBoardNo() + "&msg=" + msg;
+                } else {
+                    String msg = URLEncoder.encode("게시물을 수정하였습니다.", "UTF-8");
+                    address = "redirect:/board/getBoardOne?boardNo=" + boardDTO.getBoardNo() + "&msg=" + msg;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,19 +222,30 @@ public class BoardService {
     public String removeBoard(int boardNo) {
         String address = null;
         try {
-            int row = boardMapper.deleteBoard(boardNo);
-            if(row == 0) {
-                String msg = URLEncoder.encode("삭제 실패하였습니다.", "UTF-8");
-                address = "redirect:/board/getBoardOne?boardNo="+boardNo+"&msg="+msg;
-            } else {
-                int fileRow =boardFileMapper.deleteBoardFile(boardNo);
-                if(fileRow == 0){
-                    String msg = URLEncoder.encode("삭제 실패하였습니다.", "UTF-8");
-                    address = "redirect:/board/getBoardOne?boardNo="+boardNo+"&msg="+msg;
+            if(boardNo != 0) {
+                int row = boardMapper.deleteBoard(boardNo);
+                if (row == 0) {
+                    String msg = URLEncoder.encode("게시물 삭제 실패하였습니다.", "UTF-8");
+                    address = "redirect:/board/getBoardOne?boardNo=" + boardNo + "&msg=" + msg;
                 } else {
-                    String msg = URLEncoder.encode("삭제 성공하였습니다.", "UTF-8");
-                    address = "redirect:/board/getBoardList?msg="+msg;
+                    int fileRow = boardFileMapper.deleteBoardFile(boardNo);
+                    if (fileRow == 0) {
+                        String msg = URLEncoder.encode("파일 삭제 실패하였습니다.", "UTF-8");
+                        address = "redirect:/board/getBoardOne?boardNo=" + boardNo + "&msg=" + msg;
+                    } else {
+                        int commentRow = commentMapper.deleteCommentForDeleteBoard(boardNo);
+                        if (commentRow == 0) {
+                            String msg = URLEncoder.encode("댓글 삭제 실패하였습니다.", "UTF-8");
+                            address = "redirect:/board/getBoardOne?boardNo=" + boardNo + "&msg=" + msg;
+                        } else {
+                            String msg = URLEncoder.encode("삭제 성공하였습니다.", "UTF-8");
+                            address = "redirect:/board/getBoardList?msg=" + msg;
+                        }
+                    }
                 }
+            } else {
+                String msg = URLEncoder.encode("삭제할 게시물이 없습니다.", "UTF-8");
+                address = "redirect:/board/getBoardOne?boardNo=" + boardNo + "&msg=" + msg;
             }
         } catch (IOException e) {
             e.printStackTrace();

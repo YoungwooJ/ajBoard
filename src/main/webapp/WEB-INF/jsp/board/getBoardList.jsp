@@ -71,7 +71,8 @@
         <%--보기, 검색창--%>
         <form style="float: right" class="d-flex" method="get" action="${pageContext.request.contextPath}/board/getBoardList">
             <select name="category">
-                <option value="title" selected="selected">제목</option>
+                <option value="whole" selected="selected">전체</option>
+                <option value="title">제목</option>
                 <option value="content">내용</option>
                 <option value="writer">작성자</option>
             </select>

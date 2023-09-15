@@ -11,6 +11,12 @@ public interface CommentMapper {
     // 댓글 개수
     int selectCommentCount(int boardNo);
 
+    // 댓글 삭제 시 대댓글 삭제
+    int deleteReplyForDeleteComment(int cgroup);
+
+    // 게시물 삭제 시 댓글 삭제
+    int deleteCommentForDeleteBoard(int boardNo);
+
     // 댓글 삭제
     int deleteComment(int commentNo);
 

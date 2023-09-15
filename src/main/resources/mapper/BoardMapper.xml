@@ -16,6 +16,7 @@
         FROM board
         WHERE remv_flag = 'N'
         <if test="!''.equals(category) and category != null"> AND </if>
+        <if test="'whole'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%') or content ILIKE CONCAT('%',#{search},'%') or writer ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'title'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'content'.equals(category) and search != null">content ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'writer'.equals(category) and search != null">writer ILIKE CONCAT('%',#{search},'%')</if>
@@ -106,6 +107,7 @@
         FROM board
         WHERE remv_flag = 'N'
         <if test="!''.equals(category) and category != null"> AND </if>
+        <if test="'whole'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%') or content ILIKE CONCAT('%',#{search},'%') or writer ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'title'.equals(category) and search != null">title ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'content'.equals(category) and search != null">content ILIKE CONCAT('%',#{search},'%')</if>
         <if test="'writer'.equals(category) and search != null">writer ILIKE CONCAT('%',#{search},'%')</if>
