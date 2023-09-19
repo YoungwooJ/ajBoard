@@ -126,6 +126,7 @@
                 <tr>
                     <td>현재 비밀번호</td>
                     <td>
+                        <input type="hidden" name="id" value="${member.id}">
                         <input class="box form-control" type="password" id="oldPassword" name="oldPassword" value="">
                     </td>
                 </tr>

@@ -31,6 +31,9 @@ public interface MemberMapper {
     // ID 중복체크
     MemberDTO selectIdCheck(String id);
 
+    // 회원 정보 조회
+    MemberDTO selectMemberOne(String id);
+
     // 로그인
     MemberDTO login(MemberDTO memberDTO);
 

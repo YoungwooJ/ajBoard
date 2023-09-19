@@ -27,16 +27,14 @@ public class BoardFileController {
     @GetMapping ("/boardFile/removeBoardFile")
     public String removeBoardFile(@RequestParam(value="boardNo", required = true) int boardNo
                                 , @RequestParam(value="boardFileNo", required = true) int boardFileNo) {
-        String address = boardFileService.removeBoardFile(boardNo, boardFileNo);
-        return address;
+        return boardFileService.removeBoardFile(boardNo, boardFileNo);
     }
 
     // 파일 개별 수정
     @GetMapping("/boardFile/modifyBoardFile")
     public String modifyBoardFile(Model model
                                     , @RequestParam(value="boardFileNo", required = true) int boardFileNo) {
-        BoardFileDTO boardFileDTO = boardFileService.getBoardFileOne(boardFileNo);
-        model.addAttribute("boardFileDTO", boardFileDTO);
+        model.addAttribute("boardFileDTO", boardFileService.getBoardFileOne(boardFileNo));
         return "/boardFile/modifyBoardFile";
     }
     @PostMapping("/boardFile/modifyBoardFile")
@@ -54,8 +52,7 @@ public class BoardFileController {
     @PostMapping("/boardFile/addBoardFile")
     public String addBoardFile(HttpServletRequest request, List<MultipartFile> files, int boardNo) {
         String path = request.getServletContext().getRealPath("/boardFile-upload/");
-        String address =  boardFileService.addBoardFile(files, path, boardNo);
-        return address;
+        return boardFileService.addBoardFile(files, path, boardNo);
     }
 
     // 파일 상세정보 출력
@@ -63,8 +60,7 @@ public class BoardFileController {
     public String getBoardFileOne(Model model
                             , @RequestParam(value = "boardNo", required = true) int boardNo
                             , @RequestParam(value = "boardFileNo", required = true) int boardFileNo) {
-        BoardFileDTO boardFileDTO = boardFileService.getBoardFileOne(boardFileNo);
-        model.addAttribute("boardFileDTO", boardFileDTO);
+        model.addAttribute("boardFileDTO", boardFileService.getBoardFileOne(boardFileNo));
         model.addAttribute("boardNo", boardNo);
         return "/boardFile/getBoardFileOne";
     }

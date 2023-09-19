@@ -35,7 +35,7 @@
 
     <!-- 자바스크립트로 유효성 확인 -->
     <script>
-        $(document).ready(function(){ // 페이지가 로드되고 나면 실행
+        /*$(document).ready(function(){ // 페이지가 로드되고 나면 실행
             let idCk = false;
 
             // ID 중복체크
@@ -75,7 +75,7 @@
                     return false;
                 }
             });
-        });
+        });*/
     </script>
     <style>
         th {
@@ -117,17 +117,17 @@
             <table class="table table-bordered w-auto">
                 <tr>
                     <td>아이디</td>
-                    <td>
+                    <td colspan="3">
                         ${member.id}
                         <input type="hidden" name="oldId" value="${member.id}">
                     </td>
-                    <td>
+                    <%--<td>
                         새로운 아이디
                     </td>
                     <td>
                         <input class="box form-control" type="text" id="id" name="id" value="">
                         <button class="btn btn-info" id="idCheckBtn" type="button">중복확인</button>
-                    </td>
+                    </td>--%>
                 </tr>
                 <tr>
                     <td>이름</td>

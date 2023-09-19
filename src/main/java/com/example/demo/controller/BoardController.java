@@ -117,8 +117,7 @@ public class BoardController {
             , @RequestParam(value="rowPerPage", defaultValue= "10") int rowPerPage
             , @RequestParam(value = "msg", required = false) String msg) {
 
-        List<Map<String, Object>> boardList = boardService.getBoardList(category, search, currentPage, rowPerPage);
-        model.addAttribute("boardList", boardList);
+        model.addAttribute("boardList", boardService.getBoardList(category, search, currentPage, rowPerPage));
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("category", category);
         model.addAttribute("search", search);
@@ -145,8 +144,7 @@ public class BoardController {
     @GetMapping("/board/addBoard")
     public String addBoard(HttpSession session, Model model
                                 , @RequestParam(value = "msg", required = false) String msg) {
-        MemberDTO loginMember = (MemberDTO)session.getAttribute("loginMember");
-        model.addAttribute("loginMember", loginMember);
+        model.addAttribute("loginMember", session.getAttribute("loginMember"));
         // 메시지가 있을시
         if(msg != null) {model.addAttribute("msg", msg);}
 
@@ -155,8 +153,7 @@ public class BoardController {
     @PostMapping("/board/addBoard")
     public String addBoard(HttpServletRequest request, BoardFormDTO boardFormDTO) {
         String path = request.getServletContext().getRealPath("/boardFile-upload/");
-        String address = boardService.addBoard(boardFormDTO, path);
-        return address;
+        return boardService.addBoard(boardFormDTO, path);
     }
 
     // 게시글 수정
@@ -170,19 +167,16 @@ public class BoardController {
         // 파일이 있을시
         List<BoardFileDTO> list = boardFileService.getBoardFileList(boardNo);
         if(list != null){model.addAttribute("files", list);}
-
         return "/board/modifyBoard";
     }
     @PostMapping("/board/modifyBoard")
     public String modifyBoard(BoardDTO boardDTO) {
-        String address = boardService.modifyBoard(boardDTO);
-        return address;
+        return boardService.modifyBoard(boardDTO);
     }
 
     // 게시글 삭제
     @GetMapping("/board/removeBoard")
     public String removeBoard(@RequestParam(value = "boardNo", required = true) int boardNo) {
-        String address = boardService.removeBoard(boardNo);
-        return address;
+        return boardService.removeBoard(boardNo);
     }
 }

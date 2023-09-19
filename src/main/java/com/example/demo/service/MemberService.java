@@ -233,18 +233,18 @@ public class MemberService {
     }
 
     // 회원 비밀번호 수정
-    public String modifyMemberPassword(HttpSession session, String newPassword, String oldPassword) {
+    public String modifyMemberPassword(HttpSession session, String id, String newPassword, String oldPassword) {
         String address = null;
         try {
             if("".equals(newPassword) || "".equals(oldPassword) || newPassword == null || oldPassword == null) {
                 String msg = URLEncoder.encode("비밀번호를 입력하세요.", "UTF-8");
                 address = "redirect:/member/modifyMemberPw?msg=" + msg;
             } else {
-                MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+                MemberDTO member = memberMapper.selectMemberOne(id);
                 MemberDTO memberDTO = new MemberDTO();
                 // 비밀번호 확인
-                if (oldPassword.equals(loginMember.getPassword())) {
-                    memberDTO.setId(loginMember.getId());
+                if (oldPassword.equals(member.getPassword())) {
+                    memberDTO.setId(member.getId());
                     memberDTO.setPassword(newPassword);
                     int row = memberMapper.updateMemberPassword(memberDTO);
                     // row == 1 이면 입력 성공
@@ -272,75 +272,80 @@ public class MemberService {
     public String modifyMember(HttpSession session, MemberDTO memberDTO, String address, String oldId, String oldName, String oldBirth, String oldGender, String oldPhone, String oldEmail) {
         String returnAddress = null;
         try {
-            MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-            // 비밀번호 확인
-            if (memberDTO.getPassword().equals(loginMember.getPassword())) {
-                // 아이디 체크
-                if (memberDTO.getId() == null || "".equals(memberDTO.getId())) {
+            MemberDTO member = null;
+            // 아이디 체크
+            if (oldId != null || !("".equals(oldId))) {
+                member = memberMapper.selectMemberOne(oldId);
+
+                // 비밀번호 확인
+                if (memberDTO.getPassword().equals(member.getPassword())) {
+
+                    // 이름 체크
+                    if (memberDTO.getName() == null || "".equals(memberDTO.getName())) {
+                        memberDTO.setName(oldName);
+                    }
+
+                    // 생년월일 체크
+                    if (memberDTO.getBirth() == null || "".equals(memberDTO.getBirth())) {
+                        memberDTO.setBirth(oldBirth);
+                    }
+
+                    // 성별 체크
+                    String gender = memberDTO.getGender();
+
+                    // 성별 한글로 바꿔주기
+                    if (gender == null || "".equals(gender)) {
+                        memberDTO.setGender(oldGender);
+                    } else if ("F".equals(gender)) {
+                        memberDTO.setGender("여자");
+                    } else if ("M".equals(gender)) {
+                        memberDTO.setGender("남자");
+                    }
+
+                    // 핸드폰 번호 체크
+                    if (memberDTO.getPhone() == null || "".equals(memberDTO.getPhone())) {
+                        memberDTO.setPhone(oldPhone);
+                    }
+
+                    // 이메일 주소가 직접 입력이 아니라면
+                    if (memberDTO.getEmail() == null || "".equals(memberDTO.getEmail())) {
+                        memberDTO.setEmail(oldEmail);
+                    } else if (!"noAddress".equals(address) || memberDTO.getEmail() != null || !"".equals(memberDTO.getEmail())) {
+                        String email = memberDTO.getEmail() + "@" + address;
+                        memberDTO.setEmail(email);
+                    }
+
+                    HashMap<String, Object> map = new HashMap<String, Object>();
+                    map.put("oldId", oldId);
+                    map.put("name", memberDTO.getName());
+                    map.put("birth", memberDTO.getBirth());
+                    map.put("gender", memberDTO.getGender());
+                    map.put("phone", memberDTO.getPhone());
+                    map.put("email", memberDTO.getEmail());
+
+                    /*세션 삭제*/
+                    session.removeAttribute("loginMember");
+                    /*세션 수정*/
                     memberDTO.setId(oldId);
-                }
-
-                // 이름 체크
-                if (memberDTO.getName() == null || "".equals(memberDTO.getName())) {
-                    memberDTO.setName(oldName);
-                }
-
-                // 생년월일 체크
-                if (memberDTO.getBirth() == null || "".equals(memberDTO.getBirth())) {
-                    memberDTO.setBirth(oldBirth);
-                }
-
-                // 성별 체크
-                String gender = memberDTO.getGender();
-
-                /*성별 한글로 바꿔주기*/
-                if (gender == null || "".equals(gender)) {
-                    memberDTO.setGender(oldGender);
-                } else if ("F".equals(gender)) {
-                    memberDTO.setGender("여자");
-                } else if ("M".equals(gender)) {
-                    memberDTO.setGender("남자");
-                }
-
-                // 핸드폰 번호 체크
-                if (memberDTO.getPhone() == null || "".equals(memberDTO.getPhone())) {
-                    memberDTO.setPhone(oldPhone);
-                }
-
-                // 이메일 주소가 직접 입력이 아니라면
-                if (memberDTO.getEmail() == null || "".equals(memberDTO.getEmail())) {
-                    memberDTO.setEmail(oldEmail);
-                } else if (!"noAddress".equals(address) || memberDTO.getEmail() != null || !"".equals(memberDTO.getEmail())) {
-                    String email = memberDTO.getEmail() + "@" + address;
-                    memberDTO.setEmail(email);
-                }
-
-                HashMap<String, Object> map = new HashMap<String, Object>();
-                map.put("id", memberDTO.getId());
-                map.put("name", memberDTO.getName());
-                map.put("birth", memberDTO.getBirth());
-                map.put("gender", memberDTO.getGender());
-                map.put("phone", memberDTO.getPhone());
-                map.put("email", memberDTO.getEmail());
-                map.put("oldId", oldId);
-
-                /*세션 삭제*/
-                session.removeAttribute("loginMember");
-                /*세션 수정*/
-                session.setAttribute("loginMember", memberDTO);
-                int row = memberMapper.updateMember(map);
-                // row == 1 이면 입력 성공
-                if (row == 0) {
-                    String msg = URLEncoder.encode("시스템 에러로 변경 실패하였습니다.", "UTF-8");
+                    session.setAttribute("loginMember", memberDTO);
+                    int row = memberMapper.updateMember(map);
+                    // row == 1 이면 입력 성공
+                    if (row == 0) {
+                        String msg = URLEncoder.encode("시스템 에러로 변경 실패하였습니다.", "UTF-8");
+                        returnAddress = "redirect:/member/modifyMember?msg=" + msg;
+                    } else {
+                        String msg = URLEncoder.encode("회원정보가 수정되었습니다.", "UTF-8");
+                        returnAddress = "redirect:/member/memberOne?msg=" + msg;
+                    }
+                } else {
+                    // 비밀번호가 틀리면 return
+                    String msg = URLEncoder.encode("비밀번호를 확인하세요.", "UTF-8");
                     returnAddress = "redirect:/member/modifyMember?msg=" + msg;
                 }
             } else {
-                // 비밀번호가 틀리면 return
-                String msg = URLEncoder.encode("비밀번호가 틀렸습니다.", "UTF-8");
+                String msg = URLEncoder.encode("시스템 에러로 변경 실패하였습니다.", "UTF-8");
                 returnAddress = "redirect:/member/modifyMember?msg=" + msg;
             }
-            String msg = URLEncoder.encode("회원정보가 수정되었습니다.", "UTF-8");
-            returnAddress = "redirect:/member/memberOne?msg=" + msg;
         } catch (IOException e) {
             e.printStackTrace();
         }

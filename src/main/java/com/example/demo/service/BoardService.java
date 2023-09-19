@@ -54,24 +54,18 @@ public class BoardService {
         MemberDTO loginMember = (MemberDTO)session.getAttribute("loginMember");
         Cookie viewCookie = null;
         Cookie[] cookies=request.getCookies();
-        /*System.out.println("cookie : "+cookies);*/
 
         if(cookies !=null) {
             for (int i = 0; i < cookies.length; i++) {
-                //System.out.println("쿠키 이름 : "+cookies[i].getName());
                 //만들어진 쿠키들을 확인하며, 만약 들어온 적 있다면 생성되었을 쿠키가 있는지 확인
                 if(cookies[i].getName().equals("|"+id+boardNo+"|")) {
-                    /*System.out.println("if문 쿠키 이름 : "+cookies[i].getName());*/
                     //찾은 쿠키를 변수에 저장
                     viewCookie=cookies[i];
                 }
             }
-        }else {
-            /*System.out.println("cookies 확인 로직 : 쿠키가 없습니다.");*/
         }
         //만들어진 쿠키가 없음을 확인
         if(viewCookie==null) {
-            /*System.out.println("viewCookie 확인 로직 : 쿠키 없다");*/
             try {
                 //이 페이지에 왔다는 증거용 쿠키 생성
                 Cookie newCookie=new Cookie("|"+id+boardNo+"|","readCount");
@@ -87,14 +81,9 @@ public class BoardService {
                 viewCookie.setMaxAge((int) (todayEndSecond - currentSecond));
                 response.addCookie(viewCookie);
             } catch (Exception e) {
-                /*System.out.println("쿠키 넣을때 오류 나나? : "+e.getMessage());*/
                 e.getStackTrace();
             }
             //만들어진 쿠키가 있으면 증가로직 진행하지 않음
-        }else {
-            /*System.out.println("viewCookie 확인 로직 : 쿠키 있다");*/
-            String value=viewCookie.getValue();
-            /*System.out.println("viewCookie 확인 로직 : 쿠키 value : "+value);*/
         }
     }
 

@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
-import java.io.PrintWriter;
-import java.util.List;
 
 @Controller
 public class MemberController {
@@ -21,15 +19,13 @@ public class MemberController {
     // 관리자 : 강제 탈퇴
     @PostMapping("/member/removeMemberForced")
     public String removeMember(MemberDTO memberDTO) {
-        String address = memberService.removeMemberForced(memberDTO);
-        return address;
+        return memberService.removeMemberForced(memberDTO);
     }
 
     // 관리자 : 회원 권한 수정
     @PostMapping("/member/modifyMemberGrade")
     public String modifyMemberGrade(HttpSession session, MemberDTO memberDTO) {
-        String address = memberService.modifyMemberGrade(session, memberDTO);
-        return address;
+        return memberService.modifyMemberGrade(session, memberDTO);
     }
 
     // 관리자 : 회원 목록
@@ -38,8 +34,7 @@ public class MemberController {
                                     , @RequestParam(value="msg", required = false) String msg) {
         MemberDTO loginMember = (MemberDTO)session.getAttribute("loginMember");
         if(loginMember.getLevel() == 1) {
-            List<MemberDTO> list = memberService.getMemberList();
-            model.addAttribute("list", list);
+            model.addAttribute("list", memberService.getMemberList());
             // 메시지가 있을시
             if (msg != null) {
                 model.addAttribute("msg", msg);
@@ -64,8 +59,7 @@ public class MemberController {
     }
     @PostMapping("/member/findMemberId")
     public String findMemberId(MemberDTO memberDTO) {
-        String address = memberService.findMemberId(memberDTO);
-        return address;
+        return memberService.findMemberId(memberDTO);
     }
     @GetMapping("/member/findMemberIdResult")
     public String findMemberIdResult(Model model
@@ -82,7 +76,9 @@ public class MemberController {
 
     // 홈
     @RequestMapping("/home")
-    public String home() {
+    public String home(Model model, @RequestParam(value="msg", required = false) String msg) {
+        // 메시지가 있을시
+        if(msg != null) {model.addAttribute("msg", msg);}
         return "/home";
     }
 
@@ -94,8 +90,7 @@ public class MemberController {
     @PostMapping("/member/addMember")
     public String addMember(MemberDTO memberDTO
                                 , @RequestParam(value="address", required = true) String address) {
-        String returnAddress = memberService.addMember(memberDTO, address);
-        return returnAddress;
+        return memberService.addMember(memberDTO, address);
     }
 
     // 로그인
@@ -107,8 +102,7 @@ public class MemberController {
     }
     @PostMapping("/member/loginMember")
     public String login(HttpSession session, MemberDTO memberDTO){
-        String address = memberService.login(session, memberDTO);
-        return address;
+        return memberService.login(session, memberDTO);
     }
 
     // 로그아웃
@@ -122,8 +116,7 @@ public class MemberController {
     @GetMapping("/member/memberOne")
     public String memberOne(HttpSession session, Model model
                                     , @RequestParam(value="msg", required = false) String msg){
-        MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-        model.addAttribute("member", loginMember);
+        model.addAttribute("member", session.getAttribute("loginMember"));
         // 메시지가 있을시
         if(msg != null) {model.addAttribute("msg", msg);}
         return "/member/memberOne";
@@ -131,25 +124,26 @@ public class MemberController {
 
     // 회원 비밀번호 수정
     @GetMapping("/member/modifyMemberPw")
-    public String modifyMemberPw(HttpSession session, Model model){
-        MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-        model.addAttribute("member", loginMember);
+    public String modifyMemberPw(HttpSession session, Model model
+                                    , @RequestParam(value="msg", required = false) String msg){
+        model.addAttribute("member", session.getAttribute("loginMember"));
+        // 메시지가 있을시
+        if(msg != null) {model.addAttribute("msg", msg);}
         return "/member/modifyMemberPw";
     }
     @PostMapping("/member/modifyMemberPw")
     public String modifyMemberPw(HttpSession session
+                                    , @RequestParam(value="id", required = true) String id
                                     , @RequestParam(value="newPassword", required = true) String newPassword
                                     , @RequestParam(value="oldPassword", required = true) String oldPassword) {
-        String address = memberService.modifyMemberPassword(session, newPassword, oldPassword);
-        return address;
+        return memberService.modifyMemberPassword(session, id, newPassword, oldPassword);
     }
 
     // 회원 정보 수정
     @GetMapping("/member/modifyMember")
     public String modifyMember(HttpSession session, Model model
                                     , @RequestParam(value="msg", required = false) String msg){
-        MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-        model.addAttribute("member", loginMember);
+        model.addAttribute("member", session.getAttribute("loginMember"));
         // 메시지가 있을시
         if(msg != null) {model.addAttribute("msg", msg);}
         return "/member/modifyMember";
@@ -163,14 +157,12 @@ public class MemberController {
                                     , @RequestParam(value="oldGender", required = true) String oldGender
                                     , @RequestParam(value="oldPhone", required = true) String oldPhone
                                     , @RequestParam(value="oldEmail", required = true) String oldEmail) {
-        String returnAddress = memberService.modifyMember(session, memberDTO, address, oldId, oldName, oldBirth, oldGender, oldPhone, oldEmail);
-        return returnAddress;
+        return memberService.modifyMember(session, memberDTO, address, oldId, oldName, oldBirth, oldGender, oldPhone, oldEmail);
     }
 
     // 회원 탈퇴
     @GetMapping("/member/removeMember")
     public String removeMember(HttpSession session) {
-        String address = memberService.removeMember(session);
-        return address;
+        return memberService.removeMember(session);
     }
 }

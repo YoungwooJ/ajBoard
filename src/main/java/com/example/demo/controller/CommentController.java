@@ -17,36 +17,31 @@ public class CommentController {
     @GetMapping("/comment/removeComment")
     public String removeComment(@RequestParam(value="commentNo", required = true) int commentNo
                                 , @RequestParam(value="boardNo", required = true) int boardNo) {
-        String address = commentService.removeComment(boardNo, commentNo);
-        return address;
+        return commentService.removeComment(boardNo, commentNo);
     }
 
     // 댓글 수정
     @GetMapping("/comment/modifyComment")
     public String modifyComment(Model model, @RequestParam(value="commentNo", required = true) int commentNo
                                             , @RequestParam(value="boardNo", required = true) int boardNo) {
-        CommentDTO comment = commentService.getCommentOne(commentNo);
-        model.addAttribute("comment", comment);
+        model.addAttribute("comment", commentService.getCommentOne(commentNo));
         model.addAttribute("boardNo", boardNo);
         return "/comment/modifyComment";
     }
     @PostMapping("/comment/modifyComment")
     public String modifyComment(CommentDTO commentDTO) {
-        String address = commentService.modifyComment(commentDTO);
-        return address;
+        return commentService.modifyComment(commentDTO);
     }
 
     // 대댓글 입력
     @PostMapping("/comment/addReply")
     public String addReply(CommentDTO commentDTO) {
-        String address = commentService.addReply(commentDTO);
-        return address;
+        return commentService.addReply(commentDTO);
     }
 
     // 댓글 입력
     @PostMapping("/comment/addComment")
     public String addComment(CommentDTO commentDTO) {
-        String address = commentService.addComment(commentDTO);
-        return address;
+        return commentService.addComment(commentDTO);
     }
 }
